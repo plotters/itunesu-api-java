@@ -371,7 +371,7 @@ public class ITunesUConnection {
         arguments.put("Group", group);
         arguments.put("Destructive", destructive ? "true" : "false");
 
-        ITunesUDocument doc = new ITunesUDocument("DeleteGroup", arguments);
+        ITunesUDocument doc = new ITunesUDocument("MergeGroup", arguments);
         this.send(null, doc);
     }
 
