@@ -27,8 +27,6 @@
 
 package edu.asu.itunesu;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,14 +35,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * The iTunesU Web Services API connection.
@@ -115,6 +108,8 @@ public class ITunesUConnection {
 
     /**
      * Sets the identity from a string.
+     * 
+     * @param identity The identity as a string.
      */
     public void setIdentity(String identity) {
     	this.identity = identity;
@@ -198,6 +193,266 @@ public class ITunesUConnection {
      */
     public Group getGroup(String handle) throws ITunesUException {
         return Group.fromXml(this.showTree(handle));
+    }
+
+    /**
+     * Updates site information. Same as calling mergeSite() with
+     * mergeByHandle and destructive set to false.
+     * 
+     * @param siteHandle Handle for the site to update.
+     * @param site Object containing site information.
+     */
+    public void mergeSite(String siteHandle, Site site)
+        throws ITunesUException {
+
+        this.mergeSite(siteHandle, site, false, false);
+    }
+
+    /**
+     * Updates site information. Same as calling mergeSite() with
+     * destructive set to false.
+     * 
+     * @param siteHandle Handle for the site to update.
+     * @param site Object containing site information.
+     * @param mergeByHandle If true, merge sections by handle.
+     *                      Otherwise, merge by name.
+     */
+    public void mergeSite(String siteHandle,
+                          Site site,
+                          boolean mergeByHandle)
+        throws ITunesUException {
+
+        this.mergeSite(siteHandle, site, mergeByHandle, false);
+    }
+
+    /**
+     * Updates site information.
+     * 
+     * @param siteHandle Handle for the site to update.
+     * @param site Object containing site information.
+     * @param mergeByHandle If true, merge sections by handle.
+     *                      Otherwise, merge by name.
+     * @param destructive If true, delete any unspecified
+     *                    sections or permissions.
+     */
+    public void mergeSite(String siteHandle,
+                          Site site,
+                          boolean mergeByHandle,
+                          boolean destructive)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (siteHandle != null) {
+            arguments.put("SiteHandle", siteHandle);
+        }
+
+        arguments.put("Site", site);
+        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
+        arguments.put("Destructive", destructive ? "true" : "false");
+
+        ITunesUDocument doc = new ITunesUDocument("MergeSite", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Adds a division to a section.
+     * 
+     * @param parentHandle Handle for the parent section.
+     * @param division Object containing division information.
+     */
+    public void addDivision(String parentHandle,
+                            Division division)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (parentHandle != null) {
+            arguments.put("ParentHandle", parentHandle);
+        }
+
+        arguments.put("Division", division);
+        
+        ITunesUDocument doc = new ITunesUDocument("AddDivision", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Deletes a division from a section.
+     * 
+     * @param divisionHandle Handle for the division to delete.
+     */
+    public void deleteDivision(String divisionHandle)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (divisionHandle != null) {
+            arguments.put("DivisionHandle", divisionHandle);
+        }
+
+        ITunesUDocument doc = new ITunesUDocument("DeleteDivision", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Updates division information. Same as calling mergeDivision() with
+     * mergeByHandle and destructive set to false.
+     * 
+     * @param divisionHandle Handle for the division to update.
+     * @param division Object containing division information.
+     */
+    public void mergeDivision(String divisionHandle, Division division)
+        throws ITunesUException {
+
+        this.mergeDivision(divisionHandle, division, false, false);
+    }
+
+    /**
+     * Updates division information. Same as calling mergeDivision() with
+     * destructive set to false.
+     * 
+     * @param divisionHandle Handle for the division to update.
+     * @param division Object containing division information.
+     * @param mergeByHandle If true, merge sections by handle.
+     *                      Otherwise, merge by name.
+     */
+    public void mergeDivision(String divisionHandle,
+                              Division division,
+                              boolean mergeByHandle)
+        throws ITunesUException {
+
+        this.mergeDivision(divisionHandle, division, mergeByHandle, false);
+    }
+
+    /**
+     * Updates division information.
+     * 
+     * @param divisionHandle Handle for the division to update.
+     * @param division Object containing division information.
+     * @param mergeByHandle If true, merge sections by handle.
+     *                      Otherwise, merge by name.
+     * @param destructive If true, delete any unspecified
+     *                    sections or permissions.
+     */
+    public void mergeDivision(String divisionHandle,
+                              Division division,
+                              boolean mergeByHandle,
+                              boolean destructive)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (divisionHandle != null) {
+            arguments.put("DivisionHandle", divisionHandle);
+        }
+
+        arguments.put("Division", division);
+        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
+        arguments.put("Destructive", destructive ? "true" : "false");
+
+        ITunesUDocument doc = new ITunesUDocument("MergeDivision", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Adds a section to a site or division.
+     * 
+     * @param parentHandle Handle for the parent site or division.
+     * @param section Object containing section information.
+     */
+    public void addSection(String parentHandle,
+                           Section section)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (parentHandle != null) {
+            arguments.put("ParentHandle", parentHandle);
+        }
+
+        arguments.put("Section", section);
+        
+        ITunesUDocument doc = new ITunesUDocument("AddSection", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Deletes a section from a site or division.
+     * 
+     * @param sectionHandle Handle for the section to delete.
+     */
+    public void deleteSection(String sectionHandle)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (sectionHandle != null) {
+            arguments.put("SectionHandle", sectionHandle);
+        }
+
+        ITunesUDocument doc = new ITunesUDocument("DeleteSection", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Updates section information. Same as calling mergeSection() with
+     * mergeByHandle and destructive set to false.
+     * 
+     * @param sectionHandle Handle for the section to update.
+     * @param section Object containing section information.
+     */
+    public void mergeSection(String sectionHandle, Section section)
+        throws ITunesUException {
+
+        this.mergeSection(sectionHandle, section, false, false);
+    }
+
+    /**
+     * Updates section information. Same as calling mergeSection() with
+     * destructive set to false.
+     * 
+     * @param sectionHandle Handle for the section to update.
+     * @param section Object containing section information.
+     * @param mergeByHandle If true, merge items by handle.
+     *                      Otherwise, merge by name.
+     */
+    public void mergeSection(String sectionHandle,
+                             Section section,
+                             boolean mergeByHandle)
+        throws ITunesUException {
+
+        this.mergeSection(sectionHandle, section, mergeByHandle, false);
+    }
+
+    /**
+     * Updates section information.
+     * 
+     * @param sectionHandle Handle for the section to update.
+     * @param section Object containing section information.
+     * @param mergeByHandle If true, merge items by handle.
+     *                      Otherwise, merge by name.
+     * @param destructive If true, delete any unspecified
+     *                    items or permissions.
+     */
+    public void mergeSection(String sectionHandle,
+                             Section section,
+                             boolean mergeByHandle,
+                             boolean destructive)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (sectionHandle != null) {
+            arguments.put("SectionHandle", sectionHandle);
+        }
+
+        arguments.put("Section", section);
+        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
+        arguments.put("Destructive", destructive ? "true" : "false");
+
+        ITunesUDocument doc = new ITunesUDocument("MergeSection", arguments);
+        this.send(null, doc);
     }
 
     /**
@@ -349,7 +604,24 @@ public class ITunesUConnection {
     public void mergeGroup(String groupHandle, Group group)
         throws ITunesUException {
 
-        this.mergeGroup(groupHandle, group, false);
+        this.mergeGroup(groupHandle, group, false, false);
+    }
+
+    /**
+     * Updates group information. Same as calling mergeGroup() with
+     * destructive set to false.
+     * 
+     * @param groupHandle Handle for the group to update.
+     * @param group Object containing group information.
+     * @param mergeByHandle If true, merge tracks by handle.
+     *                      Otherwise, merge by name.
+     */
+    public void mergeGroup(String groupHandle,
+                           Group group,
+                           boolean mergeByHandle)
+        throws ITunesUException {
+
+        this.mergeGroup(groupHandle, group, mergeByHandle, false);
     }
 
     /**
@@ -357,11 +629,14 @@ public class ITunesUConnection {
      * 
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information
+     * @param mergeByHandle If true, merge tracks by handle.
+     *                      Otherwise, merge by name.
      * @param destructive If true, delete any unspecified
      *                    tracks or permissions.
      */
     public void mergeGroup(String groupHandle,
                            Group group,
+                           boolean mergeByHandle,
                            boolean destructive)
         throws ITunesUException {
 
@@ -369,9 +644,110 @@ public class ITunesUConnection {
 
         arguments.put("GroupHandle", groupHandle);
         arguments.put("Group", group);
+        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
         arguments.put("Destructive", destructive ? "true" : "false");
 
         ITunesUDocument doc = new ITunesUDocument("MergeGroup", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Adds a track to a group.
+     * 
+     * @param parentHandle Handle for the parent group.
+     * @param track Object containing track information.
+     */
+    public void addTrack(String parentHandle,
+                         Track track)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (parentHandle != null) {
+            arguments.put("ParentHandle", parentHandle);
+        }
+
+        arguments.put("Track", track);
+        
+        ITunesUDocument doc = new ITunesUDocument("AddTrack", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Deletes a track from a group.
+     * 
+     * @param trackHandle Handle for the track to delete.
+     */
+    public void deleteTrack(String trackHandle)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (trackHandle != null) {
+            arguments.put("TrackHandle", trackHandle);
+        }
+
+        ITunesUDocument doc = new ITunesUDocument("DeleteTrack", arguments);
+        this.send(null, doc);
+    }
+
+    /**
+     * Updates track information. Same as calling mergeTrack() with
+     * mergeByHandle and destructive set to false.
+     * 
+     * @param trackHandle Handle for the track to update.
+     * @param track Object containing track information.
+     */
+    public void mergeTrack(String trackHandle, Track track)
+        throws ITunesUException {
+
+        this.mergeTrack(trackHandle, track, false, false);
+    }
+
+    /**
+     * Updates track information. Same as calling mergeTrack() with
+     * destructive set to false.
+     * 
+     * @param trackHandle Handle for the track to update.
+     * @param track Object containing track information.
+     * @param mergeByHandle If true, merge items by handle.
+     *                      Otherwise, merge by name.
+     */
+    public void mergeTrack(String trackHandle,
+                           Track track,
+                           boolean mergeByHandle)
+        throws ITunesUException {
+
+        this.mergeTrack(trackHandle, track, mergeByHandle, false);
+    }
+
+    /**
+     * Updates track information.
+     * 
+     * @param trackHandle Handle for the track to update.
+     * @param track Object containing track information.
+     * @param mergeByHandle If true, merge items by handle.
+     *                      Otherwise, merge by name.
+     * @param destructive If true, delete any unspecified
+     *                    items or permissions.
+     */
+    public void mergeTrack(String trackHandle,
+                           Track track,
+                           boolean mergeByHandle,
+                           boolean destructive)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        if (trackHandle != null) {
+            arguments.put("TrackHandle", trackHandle);
+        }
+
+        arguments.put("Track", track);
+        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
+        arguments.put("Destructive", destructive ? "true" : "false");
+
+        ITunesUDocument doc = new ITunesUDocument("MergeTrack", arguments);
         this.send(null, doc);
     }
 
@@ -414,8 +790,25 @@ public class ITunesUConnection {
         this.send(null, doc);
     }
 
+    /* This method is in the XSD, but does not appear to work (7-21-2007):
+       No Credential node specified in XML at #document-->ITunesUDocument-->DeletePermission
+
+    public void deletePermission(String parentHandle,
+                                 Permission permission)
+        throws ITunesUException {
+
+        Map<String, Object> arguments = new HashMap<String, Object>();
+
+        arguments.put("ParentHandle", parentHandle);
+        arguments.put("Permission", permission);
+
+        ITunesUDocument doc = new ITunesUDocument("DeletePermission", arguments);
+        this.send(null, doc);
+    }
+    */
+
     /**
-     * Updates permission information.
+     * Updates a permission.
      * 
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
@@ -429,42 +822,35 @@ public class ITunesUConnection {
         arguments.put("ParentHandle", parentHandle);
         arguments.put("Permission", permission);
 
-        ITunesUDocument doc =
-            new ITunesUDocument("MergePermission", arguments);
+        ITunesUDocument doc = new ITunesUDocument("MergePermission", arguments);
         this.send(null, doc);
     }
 
     /**
-     * Deletes a track.
-     * 
-     * @param trackHandle Handle for the track to delete.
+     * Adds a credential.
+     *
+     * @param credential The credential to add.
      */
-    public void deleteTrack(String trackHandle)
-        throws ITunesUException {
-
+    public void addCredential(String credential) throws ITunesUException {
         Map<String, Object> arguments = new HashMap<String, Object>();
 
-        arguments.put("TrackHandle", trackHandle);
+        arguments.put("Credential", credential);
 
-        ITunesUDocument doc = new ITunesUDocument("DeleteTrack", arguments);
+        ITunesUDocument doc = new ITunesUDocument("AddCredential", arguments);
         this.send(null, doc);
     }
 
     /**
-     * Updates track information.
-     * 
-     * @param trackHandle Handle for the track to update.
-     * @param track Object containing track information.
+     * Deletes a credential.
+     *
+     * @param credential The credential to delete.
      */
-    public void mergeTrack(String trackHandle, Track track)
-        throws ITunesUException {
-
+    public void deleteCredential(String credential) throws ITunesUException {
         Map<String, Object> arguments = new HashMap<String, Object>();
-    
-        arguments.put("TrackHandle", trackHandle);
-        arguments.put("Track", track);
-    
-        ITunesUDocument doc = new ITunesUDocument("MergeTrack", arguments);
+
+        arguments.put("Credential", credential);
+
+        ITunesUDocument doc = new ITunesUDocument("DeleteCredential", arguments);
         this.send(null, doc);
     }
 
@@ -518,6 +904,7 @@ public class ITunesUConnection {
     
     /**
      * Generates and returns a new iTunesU upload URL.
+     * 
      * @param handle Handle for the destination.
      * @param forXml True for uploading XML, false for uploading content.
      * @return The URL as a string.
@@ -555,43 +942,11 @@ public class ITunesUConnection {
             throw new ITunesUException(e);
         }
 
-        Pattern pattern = Pattern.compile(".*<error>(.*)</error>.*");
+        Pattern pattern = Pattern.compile(".*<error>(.*)</error>.*",
+                                          Pattern.DOTALL);
         Matcher matcher = pattern.matcher(result);
         if (matcher.matches()) {
             throw new ITunesUException(matcher.group(1));
-        }
-    }
-
-    @SuppressWarnings("unused")
-    private Document sendAndReceive(String handle, ITunesUDocument doc)
-        throws ITunesUException {
-    
-        String result;
-        
-        try {
-            result = this.execute(handle, doc.toXml());
-        } catch (ParserConfigurationException e) {
-            throw new ITunesUException(e);
-        } catch (TransformerException e) {
-            throw new ITunesUException(e);
-        }
-    
-        DocumentBuilderFactory docFactory =
-            DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder;
-        
-        try {
-            docBuilder = docFactory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new ITunesUException(e);
-        }
-
-        try {
-            return docBuilder.parse(new InputSource(new StringReader(result)));
-        } catch (SAXException e) {
-            throw new ITunesUException(e);
-        } catch (IOException e) {
-            throw new ITunesUException(e);
         }
     }
 
