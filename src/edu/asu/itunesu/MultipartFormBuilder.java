@@ -30,10 +30,8 @@ package edu.asu.itunesu;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
 import javax.mail.MessagingException;
+import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
@@ -55,17 +53,7 @@ class MultipartFormBuilder {
 
     public static String getMultipartBoundary(MimeMultipart multipart)
         throws MessagingException {
-
-        Pattern pattern = Pattern.compile(".*boundary=\"([^\"]+)\"",
-                                          Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(multipart.getContentType());
-
-        if (matcher.matches()) {
-            return matcher.group(1);
-        } else {
-            throw new MessagingException("unable to find content boundary in "
-                                         + multipart.getContentType());
-        }
+    	return new ContentType(multipart.getContentType()).getParameter("boundary");
     }
 
     public static String getMultipartData(MimeMultipart multipart)
