@@ -903,6 +903,25 @@ public class ITunesUConnection {
     }
     
     /**
+     * Reads RSS feed XML for an element by its handle.
+     * 
+     * @param handle Handle of the element.
+     * @return An XML string.
+     */
+    public String showFeed(String handle) throws ITunesUException {
+        String prefix = this.getPrefix();
+        String url = prefix + "/Feed/" + this.getDestination(handle);
+
+        ITunesU iTunesU = new ITunesU();
+
+        try {
+            return iTunesU.invokeAction(url, this.generateToken());
+        } catch (AssertionError e) {
+            throw new ITunesUException(e);
+        }    	
+    }
+    
+    /**
      * Generates and returns a new iTunesU upload URL.
      * 
      * @param handle Handle for the destination.
