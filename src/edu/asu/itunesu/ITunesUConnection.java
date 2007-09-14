@@ -27,21 +27,29 @@
 
 package edu.asu.itunesu;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
+import org.xml.sax.SAXException;
 
 /**
  * The iTunesU Web Services API connection.
- * 
+ *
  * @author <a href="mailto:ramen@asu.edu">Dave Benjamin</a>
  */
 public class ITunesUConnection {
@@ -54,9 +62,56 @@ public class ITunesUConnection {
 
     private boolean debug;
 
+    private String requestValidationXsdPath;
+    private String responseValidationXsdPath;
+    private boolean dryRun;
+
+    /**
+     * @return the requestValidationXsdPath
+     */
+    public String getRequestValidationXsdPath() {
+        return this.requestValidationXsdPath;
+    }
+
+    /**
+     * @param requestValidationXsdPath Path to XSD file to validate requests, or null to skip request validation.
+     */
+    public void setRequestValidationXsdPath(String requestValidationXsdPath) {
+        this.requestValidationXsdPath = requestValidationXsdPath;
+    }
+
+    /**
+     * @return Path to XSD file to validate requests.
+     */
+    public String getResponseValidationXsdPath() {
+        return this.responseValidationXsdPath;
+    }
+
+    /**
+     * @param responseValidationXsdPath Path to XSD file to validate responses, or null to skip response validation.
+     */
+    public void setResponseValidationXsdPath(String responseValidationXsdPath) {
+        this.responseValidationXsdPath = responseValidationXsdPath;
+    }
+
+    /**
+     * @return the dryRun
+     */
+    public boolean getDryRun() {
+        return this.dryRun;
+    }
+
+    /**
+     * @param dryRun If true, request documents will not actually be sent to the iTunes U server.
+     *               This can be used to perform validation on requests only.
+     */
+    public void setDryRun(boolean dryRun) {
+        this.dryRun = dryRun;
+    }
+
     /**
      * Constructor.
-     *  
+     *
      * @param siteUrl      The URL to your site in iTunes U. The last
      *                     component of that URL, after the last slash,
      *                     is a domain name that uniquely identifies your
@@ -84,12 +139,15 @@ public class ITunesUConnection {
         this.sharedSecret = sharedSecret;
         this.credentials = credentials;
         this.debug = false;
+        this.requestValidationXsdPath = null;
+        this.responseValidationXsdPath = null;
+        this.dryRun = false;
     }
 
     /**
      * Sets the identity from user information.
      * Calling this method is optional. All parameters may be null.
-     * 
+     *
      * @param displayName The user's name.
      * @param emailAddress The user's email address.
      * @param username The user's username.
@@ -99,7 +157,7 @@ public class ITunesUConnection {
                             String emailAddress,
                             String username,
                             String userIdentifier) throws ITunesUException {
-    	ITunesU iTunesU = new ITunesU();
+        ITunesU iTunesU = new ITunesU();
         this.identity = iTunesU.getIdentityString(displayName,
                                                   emailAddress,
                                                   username,
@@ -108,17 +166,17 @@ public class ITunesUConnection {
 
     /**
      * Sets the identity from a string.
-     * 
+     *
      * @param identity The identity as a string.
      */
     public void setIdentity(String identity) {
-    	this.identity = identity;
+        this.identity = identity;
     }
-    
+
     /**
      * Gets the value of the debug flag which determines whether or not to
      * use the debug prefix in requests. This flag is false by default.
-     * 
+     *
      * @return True if the debug prefix is enabled.
      */
     public boolean getDebug() {
@@ -128,7 +186,7 @@ public class ITunesUConnection {
     /**
      * Sets the value of the debug flag which determines whether or not to
      * use the debug prefix in requests.
-     * 
+     *
      * @param debug True to enable the debug prefix, false otherwise.
      */
     public void setDebug(boolean debug) {
@@ -137,7 +195,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves the entire site.
-     * 
+     *
      * @return A {@link Site} model object.
      */
     public Site getSite() throws ITunesUException {
@@ -148,7 +206,7 @@ public class ITunesUConnection {
      * Retrieves the entire site, loading a minimal amount of data.
      * Permissions and tracks are omitted. Only the name and handle
      * attributes are populated.
-     * 
+     *
      * @return A {@link Site} model object.
      */
     public Site getSiteMinimal() throws ITunesUException {
@@ -157,7 +215,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a section by its handle.
-     * 
+     *
      * @param handle The handle of the section.
      * @return A {@link Section} model object.
      */
@@ -167,7 +225,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a division by its handle.
-     * 
+     *
      * @param handle The handle of the division.
      * @return A {@link Division} model object.
      */
@@ -177,7 +235,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a course by its handle.
-     * 
+     *
      * @param handle The handle of the course.
      * @return A {@link Course} model object.
      */
@@ -187,7 +245,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a group by its handle.
-     * 
+     *
      * @param handle The handle of the group.
      * @return A {@link Group} model object.
      */
@@ -198,7 +256,7 @@ public class ITunesUConnection {
     /**
      * Updates site information. Same as calling mergeSite() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      */
@@ -211,7 +269,7 @@ public class ITunesUConnection {
     /**
      * Updates site information. Same as calling mergeSite() with
      * destructive set to false.
-     * 
+     *
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -227,7 +285,7 @@ public class ITunesUConnection {
 
     /**
      * Updates site information.
-     * 
+     *
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -241,15 +299,15 @@ public class ITunesUConnection {
                           boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         if (siteHandle != null) {
             arguments.put("SiteHandle", siteHandle);
         }
 
-        arguments.put("Site", site);
         arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
         arguments.put("Destructive", destructive ? "true" : "false");
+        arguments.put("Site", site);
 
         ITunesUDocument doc = new ITunesUDocument("MergeSite", arguments);
         this.send(null, doc);
@@ -257,39 +315,36 @@ public class ITunesUConnection {
 
     /**
      * Adds a division to a section.
-     * 
+     *
      * @param parentHandle Handle for the parent section.
      * @param division Object containing division information.
      */
-    public void addDivision(String parentHandle,
+    public String addDivision(String parentHandle,
                             Division division)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
+        arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath?
         arguments.put("Division", division);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddDivision", arguments);
-        this.send(null, doc);
+        return this.send(null, doc).getAddedObjectHandle();
     }
 
     /**
      * Deletes a division from a section.
-     * 
+     *
      * @param divisionHandle Handle for the division to delete.
      */
     public void deleteDivision(String divisionHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (divisionHandle != null) {
-            arguments.put("DivisionHandle", divisionHandle);
-        }
+        arguments.put("DivisionHandle", divisionHandle);
+        // todo: DivisionPath?
 
         ITunesUDocument doc = new ITunesUDocument("DeleteDivision", arguments);
         this.send(null, doc);
@@ -298,7 +353,7 @@ public class ITunesUConnection {
     /**
      * Updates division information. Same as calling mergeDivision() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      */
@@ -311,7 +366,7 @@ public class ITunesUConnection {
     /**
      * Updates division information. Same as calling mergeDivision() with
      * destructive set to false.
-     * 
+     *
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -327,7 +382,7 @@ public class ITunesUConnection {
 
     /**
      * Updates division information.
-     * 
+     *
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -341,15 +396,13 @@ public class ITunesUConnection {
                               boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (divisionHandle != null) {
-            arguments.put("DivisionHandle", divisionHandle);
-        }
-
-        arguments.put("Division", division);
+        arguments.put("DivisionHandle", divisionHandle);
+        // todo: DivisionPath?
         arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
         arguments.put("Destructive", destructive ? "true" : "false");
+        arguments.put("Division", division);
 
         ITunesUDocument doc = new ITunesUDocument("MergeDivision", arguments);
         this.send(null, doc);
@@ -357,39 +410,36 @@ public class ITunesUConnection {
 
     /**
      * Adds a section to a site or division.
-     * 
+     *
      * @param parentHandle Handle for the parent site or division.
      * @param section Object containing section information.
      */
-    public void addSection(String parentHandle,
+    public String addSection(String parentHandle,
                            Section section)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
+        arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath
         arguments.put("Section", section);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddSection", arguments);
-        this.send(null, doc);
+        return this.send(null, doc).getAddedObjectHandle();
     }
 
     /**
      * Deletes a section from a site or division.
-     * 
+     *
      * @param sectionHandle Handle for the section to delete.
      */
     public void deleteSection(String sectionHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (sectionHandle != null) {
-            arguments.put("SectionHandle", sectionHandle);
-        }
+        arguments.put("SectionHandle", sectionHandle);
+        // todo: SectionPath?
 
         ITunesUDocument doc = new ITunesUDocument("DeleteSection", arguments);
         this.send(null, doc);
@@ -398,7 +448,7 @@ public class ITunesUConnection {
     /**
      * Updates section information. Same as calling mergeSection() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      */
@@ -411,7 +461,7 @@ public class ITunesUConnection {
     /**
      * Updates section information. Same as calling mergeSection() with
      * destructive set to false.
-     * 
+     *
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      * @param mergeByHandle If true, merge items by handle.
@@ -427,7 +477,7 @@ public class ITunesUConnection {
 
     /**
      * Updates section information.
-     * 
+     *
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      * @param mergeByHandle If true, merge items by handle.
@@ -441,12 +491,10 @@ public class ITunesUConnection {
                              boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (sectionHandle != null) {
-            arguments.put("SectionHandle", sectionHandle);
-        }
-
+        arguments.put("SectionHandle", sectionHandle);
+        // todo: SectionPath?
         arguments.put("Section", section);
         arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
         arguments.put("Destructive", destructive ? "true" : "false");
@@ -457,45 +505,44 @@ public class ITunesUConnection {
 
     /**
      * Adds a course to a section.
-     * 
+     *
      * @param parentHandle Handle for the parent section.
      * @param templateHandle Handle for the course template, or null if none.
      * @param course Object containing course information.
      */
-    public void addCourse(String parentHandle,
+    public String addCourse(String parentHandle,
                           String templateHandle,
                           Course course)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
+        arguments.put("ParentHandle", parentHandle);
+
+        // todo: ParentPath?
 
         if (templateHandle != null) {
             arguments.put("TemplateHandle", templateHandle);
         }
 
         arguments.put("Course", course);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddCourse", arguments);
-        this.send(null, doc);
+        return this.send(null, doc).getAddedObjectHandle();
     }
 
     /**
      * Deletes a course from a section.
-     * 
+     *
      * @param courseHandle Handle for the course to delete.
      */
     public void deleteCourse(String courseHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (courseHandle != null) {
-            arguments.put("CourseHandle", courseHandle);
-        }
+        arguments.put("CourseHandle", courseHandle);
+        // todo: CoursePath?
 
         ITunesUDocument doc = new ITunesUDocument("DeleteCourse", arguments);
         this.send(null, doc);
@@ -504,7 +551,7 @@ public class ITunesUConnection {
     /**
      * Updates course information. Same as calling mergeCourse() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      */
@@ -517,7 +564,7 @@ public class ITunesUConnection {
     /**
      * Updates course information. Same as calling mergeCourse() with
      * destructive set to false.
-     * 
+     *
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      * @param mergeByHandle If true, merge groups by handle.
@@ -533,7 +580,7 @@ public class ITunesUConnection {
 
     /**
      * Updates course information.
-     * 
+     *
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      * @param mergeByHandle If true, merge groups by handle.
@@ -547,15 +594,13 @@ public class ITunesUConnection {
                             boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (courseHandle != null) {
-            arguments.put("CourseHandle", courseHandle);
-        }
-
-        arguments.put("Course", course);
+        arguments.put("CourseHandle", courseHandle);
+        // todo: CoursePath?
         arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
         arguments.put("Destructive", destructive ? "true" : "false");
+        arguments.put("Course", course);
 
         ITunesUDocument doc = new ITunesUDocument("MergeCourse", arguments);
         this.send(null, doc);
@@ -563,32 +608,35 @@ public class ITunesUConnection {
 
     /**
      * Adds a group (also called a tab) to a course.
-     * 
+     *
      * @param parentHandle Handle for the parent course.
      * @param group Object containing group information.
      */
-    public void addGroup(String parentHandle, Group group)
+    public String addGroup(String parentHandle, Group group)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath?
         arguments.put("Group", group);
 
         ITunesUDocument doc = new ITunesUDocument("AddGroup", arguments);
-        this.send(null, doc);
+        return this.send(null, doc).getAddedObjectHandle();
     }
 
     /**
      * Deletes a group from a course.
-     * 
+     *
      * @param groupHandle Handle for the group to delete.
      */
     public void deleteGroup(String groupHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+
         arguments.put("GroupHandle", groupHandle);
+        // todo: GroupPath?
 
         ITunesUDocument doc = new ITunesUDocument("DeleteGroup", arguments);
         this.send(null, doc);
@@ -597,7 +645,7 @@ public class ITunesUConnection {
     /**
      * Updates group information. Same as calling mergeGroup() with
      * destructive set to false.
-     * 
+     *
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information.
      */
@@ -610,7 +658,7 @@ public class ITunesUConnection {
     /**
      * Updates group information. Same as calling mergeGroup() with
      * destructive set to false.
-     * 
+     *
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information.
      * @param mergeByHandle If true, merge tracks by handle.
@@ -626,7 +674,7 @@ public class ITunesUConnection {
 
     /**
      * Updates group information.
-     * 
+     *
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information
      * @param mergeByHandle If true, merge tracks by handle.
@@ -640,12 +688,13 @@ public class ITunesUConnection {
                            boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("GroupHandle", groupHandle);
-        arguments.put("Group", group);
+        // todo: GroupPath?
         arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
         arguments.put("Destructive", destructive ? "true" : "false");
+        arguments.put("Group", group);
 
         ITunesUDocument doc = new ITunesUDocument("MergeGroup", arguments);
         this.send(null, doc);
@@ -653,99 +702,54 @@ public class ITunesUConnection {
 
     /**
      * Adds a track to a group.
-     * 
+     *
      * @param parentHandle Handle for the parent group.
      * @param track Object containing track information.
      */
-    public void addTrack(String parentHandle,
+    public String addTrack(String parentHandle,
                          Track track)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
+        arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath?
         arguments.put("Track", track);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddTrack", arguments);
-        this.send(null, doc);
+        return this.send(null, doc).getAddedObjectHandle();
     }
 
     /**
      * Deletes a track from a group.
-     * 
+     *
      * @param trackHandle Handle for the track to delete.
      */
     public void deleteTrack(String trackHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (trackHandle != null) {
-            arguments.put("TrackHandle", trackHandle);
-        }
+        arguments.put("TrackHandle", trackHandle);
 
         ITunesUDocument doc = new ITunesUDocument("DeleteTrack", arguments);
         this.send(null, doc);
     }
 
     /**
-     * Updates track information. Same as calling mergeTrack() with
-     * mergeByHandle and destructive set to false.
-     * 
-     * @param trackHandle Handle for the track to update.
-     * @param track Object containing track information.
-     */
-    public void mergeTrack(String trackHandle, Track track)
-        throws ITunesUException {
-
-        this.mergeTrack(trackHandle, track, false, false);
-    }
-
-    /**
-     * Updates track information. Same as calling mergeTrack() with
-     * destructive set to false.
-     * 
-     * @param trackHandle Handle for the track to update.
-     * @param track Object containing track information.
-     * @param mergeByHandle If true, merge items by handle.
-     *                      Otherwise, merge by name.
-     */
-    public void mergeTrack(String trackHandle,
-                           Track track,
-                           boolean mergeByHandle)
-        throws ITunesUException {
-
-        this.mergeTrack(trackHandle, track, mergeByHandle, false);
-    }
-
-    /**
      * Updates track information.
-     * 
+     *
      * @param trackHandle Handle for the track to update.
      * @param track Object containing track information.
-     * @param mergeByHandle If true, merge items by handle.
-     *                      Otherwise, merge by name.
-     * @param destructive If true, delete any unspecified
-     *                    items or permissions.
      */
     public void mergeTrack(String trackHandle,
-                           Track track,
-                           boolean mergeByHandle,
-                           boolean destructive)
+                           Track track)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (trackHandle != null) {
-            arguments.put("TrackHandle", trackHandle);
-        }
-
+        arguments.put("TrackHandle", trackHandle);
         arguments.put("Track", track);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
 
         ITunesUDocument doc = new ITunesUDocument("MergeTrack", arguments);
         this.send(null, doc);
@@ -753,26 +757,27 @@ public class ITunesUConnection {
 
     /**
      * Adds a permission to a section, course, or group.
-     * 
+     *
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
      */
-    public void addPermission(String parentHandle,
+    public String addPermission(String parentHandle,
                               Permission permission)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath?
         arguments.put("Permission", permission);
 
         ITunesUDocument doc = new ITunesUDocument("AddPermission", arguments);
-        this.send(null, doc);
+        return this.send(null, doc).getAddedObjectHandle();
     }
 
     /**
      * Deletes a permission from a section, course, or group.
-     * 
+     *
      * @param parentHandle Handle for the parent section, course, or group.
      * @param credential Credential of permission to delete.
      */
@@ -780,9 +785,10 @@ public class ITunesUConnection {
                                  String credential)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath?
         arguments.put("Credential", credential);
 
         ITunesUDocument doc =
@@ -790,26 +796,9 @@ public class ITunesUConnection {
         this.send(null, doc);
     }
 
-    /* This method is in the XSD, but does not appear to work (7-21-2007):
-       No Credential node specified in XML at #document-->ITunesUDocument-->DeletePermission
-
-    public void deletePermission(String parentHandle,
-                                 Permission permission)
-        throws ITunesUException {
-
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("ParentHandle", parentHandle);
-        arguments.put("Permission", permission);
-
-        ITunesUDocument doc = new ITunesUDocument("DeletePermission", arguments);
-        this.send(null, doc);
-    }
-    */
-
     /**
      * Updates a permission.
-     * 
+     *
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
      */
@@ -817,9 +806,10 @@ public class ITunesUConnection {
                                 Permission permission)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("ParentHandle", parentHandle);
+        // todo: ParentPath?
         arguments.put("Permission", permission);
 
         ITunesUDocument doc = new ITunesUDocument("MergePermission", arguments);
@@ -832,7 +822,7 @@ public class ITunesUConnection {
      * @param credential The credential to add.
      */
     public void addCredential(String credential) throws ITunesUException {
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("Credential", credential);
 
@@ -846,7 +836,7 @@ public class ITunesUConnection {
      * @param credential The credential to delete.
      */
     public void deleteCredential(String credential) throws ITunesUException {
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
         arguments.put("Credential", credential);
 
@@ -856,7 +846,7 @@ public class ITunesUConnection {
 
     /**
      * Reads XML for an element by its handle.
-     * 
+     *
      * @param handle Handle of the parent element, or null for the whole site.
      * @return An XML string.
      */
@@ -875,7 +865,7 @@ public class ITunesUConnection {
 
     /**
      * Reads XML for an element by its handle, specifying a key group.
-     * 
+     *
      * @param handle Handle of the parent element, or null for the whole site.
      * @param keyGroup Must be one of: minimal, most, maximal
      * @return An XML string.
@@ -883,28 +873,40 @@ public class ITunesUConnection {
     public String showTree(String handle, String keyGroup)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
 
-        if (handle != null) {
-            arguments.put("Handle", handle);
-        }
-
+        arguments.put("Handle", handle != null ? handle : "");
         arguments.put("KeyGroup", keyGroup);
 
         ITunesUDocument doc = new ITunesUDocument("ShowTree", arguments);
 
+        String requestXml;
         try {
-            return this.execute(null, doc.toXml());
+            requestXml = doc.toXml();;
         } catch (ParserConfigurationException e) {
             throw new ITunesUException(e);
         } catch (TransformerException e) {
             throw new ITunesUException(e);
         }
+
+        validateRequestXml(requestXml);
+        if (this.dryRun) {
+            return null;
+        }
+        String responseXml = this.execute(handle, requestXml);
+        validateResponseXml(responseXml);
+
+        ITunesUResponse response = ITunesUResponse.fromXml(responseXml);
+        if (response.getError() != null) {
+        	throw new ITunesUException(response.getError());
+        } else {
+        	return response.getResultXml();
+        }
     }
-    
+
     /**
      * Reads RSS feed XML for an element by its handle.
-     * 
+     *
      * @param handle Handle of the element.
      * @return An XML string.
      */
@@ -918,12 +920,31 @@ public class ITunesUConnection {
             return iTunesU.invokeAction(url, this.generateToken());
         } catch (AssertionError e) {
             throw new ITunesUException(e);
-        }    	
+        }
     }
-    
+
+    public String getDailyReportLogs(String startDate, String endDate) throws ITunesUException {
+        ITunesU iTunesU = new ITunesU();
+
+        String url = (this.getPrefix()
+                      + "/API/GetDailyReportLogs/"
+                      + this.getDestination(null)
+                      + "?StartDate=" + startDate);
+
+        if (endDate != null) {
+            url += "&EndDate=" + endDate;
+        }
+
+        try {
+            return iTunesU.invokeAction(url, this.generateToken());
+        } catch (AssertionError e) {
+            throw new ITunesUException(e);
+        }
+    }
+
     /**
      * Generates and returns a new iTunesU upload URL.
-     * 
+     *
      * @param handle Handle for the destination.
      * @param forXml True for uploading XML, false for uploading content.
      * @return The URL as a string.
@@ -940,7 +961,7 @@ public class ITunesUConnection {
         if (forXml) {
             url += "?type=XMLControlFile";
         }
-        
+
         try {
             return iTunesU.invokeAction(url, this.generateToken());
         } catch (AssertionError e) {
@@ -948,24 +969,72 @@ public class ITunesUConnection {
         }
     }
 
-    private void send(String handle, ITunesUDocument doc)
+    private ITunesUResponse send(String handle, ITunesUDocument doc)
         throws ITunesUException {
-    
-        String result;
-        
+
+        String requestXml;
         try {
-            result = this.execute(handle, doc.toXml());
+            requestXml = doc.toXml();;
         } catch (ParserConfigurationException e) {
             throw new ITunesUException(e);
         } catch (TransformerException e) {
             throw new ITunesUException(e);
         }
 
-        Pattern pattern = Pattern.compile(".*<error>(.*)</error>.*",
-                                          Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(result);
-        if (matcher.matches()) {
-            throw new ITunesUException(matcher.group(1));
+        validateRequestXml(requestXml);
+        if (this.dryRun) {
+            return null;
+        }
+        String responseXml = this.execute(handle, requestXml);
+        validateResponseXml(responseXml);
+        
+        ITunesUResponse response = ITunesUResponse.fromXml(responseXml);
+        if (response.getError() != null) {
+        	throw new ITunesUException(response.getError());
+        } else {
+        	return response;
+        }
+    }
+
+    private void validateRequestXml(String xml) throws ITunesUException {
+        if (this.requestValidationXsdPath != null) {
+        	
+        	// debug:
+        	System.out.println("Validating the following XML against " + this.requestValidationXsdPath + "\n" + xml + "\n");
+
+        	SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+            File schemaLocation = new File(this.requestValidationXsdPath);
+            try {
+                Schema schema = factory.newSchema(schemaLocation);
+                Validator validator = schema.newValidator();
+                Source source = new StreamSource(new StringReader(xml));
+                validator.validate(source);
+            } catch (SAXException e) {
+                throw new ITunesUException(e);
+            } catch (IOException e) {
+                throw new ITunesUException(e);
+            }
+        }
+    }
+
+    private void validateResponseXml(String xml) throws ITunesUException {
+        if (this.responseValidationXsdPath != null) {
+
+        	// debug:
+        	System.out.println("Validating the following XML against " + this.responseValidationXsdPath + "\n" + xml + "\n");
+            
+        	SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+            File schemaLocation = new File(this.responseValidationXsdPath);
+            try {
+                Schema schema = factory.newSchema(schemaLocation);
+                Validator validator = schema.newValidator();
+                Source source = new StreamSource(new StringReader(xml));
+                validator.validate(source);
+            } catch (SAXException e) {
+                throw new ITunesUException(e);
+            } catch (IOException e) {
+                throw new ITunesUException(e);
+            }
         }
     }
 
@@ -987,13 +1056,13 @@ public class ITunesUConnection {
     }
 
     private String generateToken() throws ITunesUException {
-    	ITunesU iTunesU = new ITunesU();
+        ITunesU iTunesU = new ITunesU();
 
         String credentials = iTunesU.getCredentialsString(this.credentials);
         String identity = this.identity == null ? "" : this.identity;
         Date now = new Date();
         byte[] key;
-        
+
         try {
             key = sharedSecret.getBytes("US-ASCII");
         } catch (UnsupportedEncodingException e) {
@@ -1003,7 +1072,7 @@ public class ITunesUConnection {
         String token = iTunesU.getAuthorizationToken(credentials, identity, now, key);
         return token;
     }
-    
+
     private String getDestination(String handle) {
         String destination = this.getSiteDomain();
 
