@@ -47,6 +47,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 class ITunesUDocument {
+	public static final String VERSION = "1.0.1";
+
     private String method;
     private Map<String, Object> arguments;
 
@@ -79,6 +81,10 @@ class ITunesUDocument {
         Element root = doc.createElement("ITunesUDocument");
         doc.appendChild(root);
 
+        Element version = doc.createElement("Version");
+        version.setTextContent(VERSION);
+        root.appendChild(version);
+
         Element method = doc.createElement(this.method);
         root.appendChild(method);
 
@@ -108,7 +114,6 @@ class ITunesUDocument {
 
         TransformerFactory transFactory = TransformerFactory.newInstance();
         Transformer trans = transFactory.newTransformer();
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
         StringWriter writer = new StringWriter();

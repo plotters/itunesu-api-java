@@ -177,7 +177,6 @@ public class Site implements ITunesUElement {
         
         TransformerFactory transFactory = TransformerFactory.newInstance();
         Transformer trans = transFactory.newTransformer();
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         trans.setOutputProperty(OutputKeys.INDENT, "yes");
         
         StringWriter writer = new StringWriter();
