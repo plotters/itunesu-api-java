@@ -67,49 +67,6 @@ public class ITunesUConnection {
     private boolean dryRun;
 
     /**
-     * @return the requestValidationXsdPath
-     */
-    public String getRequestValidationXsdPath() {
-        return this.requestValidationXsdPath;
-    }
-
-    /**
-     * @param requestValidationXsdPath Path to XSD file to validate requests, or null to skip request validation.
-     */
-    public void setRequestValidationXsdPath(String requestValidationXsdPath) {
-        this.requestValidationXsdPath = requestValidationXsdPath;
-    }
-
-    /**
-     * @return Path to XSD file to validate requests.
-     */
-    public String getResponseValidationXsdPath() {
-        return this.responseValidationXsdPath;
-    }
-
-    /**
-     * @param responseValidationXsdPath Path to XSD file to validate responses, or null to skip response validation.
-     */
-    public void setResponseValidationXsdPath(String responseValidationXsdPath) {
-        this.responseValidationXsdPath = responseValidationXsdPath;
-    }
-
-    /**
-     * @return the dryRun
-     */
-    public boolean getDryRun() {
-        return this.dryRun;
-    }
-
-    /**
-     * @param dryRun If true, request documents will not actually be sent to the iTunes U server.
-     *               This can be used to perform validation on requests only.
-     */
-    public void setDryRun(boolean dryRun) {
-        this.dryRun = dryRun;
-    }
-
-    /**
      * Constructor.
      *
      * @param siteUrl      The URL to your site in iTunes U. The last
@@ -191,6 +148,49 @@ public class ITunesUConnection {
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
+    }
+
+    /**
+     * @return the requestValidationXsdPath
+     */
+    public String getRequestValidationXsdPath() {
+        return this.requestValidationXsdPath;
+    }
+
+    /**
+     * @param requestValidationXsdPath Path to XSD file to validate requests, or null to skip request validation.
+     */
+    public void setRequestValidationXsdPath(String requestValidationXsdPath) {
+        this.requestValidationXsdPath = requestValidationXsdPath;
+    }
+
+    /**
+     * @return Path to XSD file to validate requests.
+     */
+    public String getResponseValidationXsdPath() {
+        return this.responseValidationXsdPath;
+    }
+
+    /**
+     * @param responseValidationXsdPath Path to XSD file to validate responses, or null to skip response validation.
+     */
+    public void setResponseValidationXsdPath(String responseValidationXsdPath) {
+        this.responseValidationXsdPath = responseValidationXsdPath;
+    }
+
+    /**
+     * @return the dryRun
+     */
+    public boolean getDryRun() {
+        return this.dryRun;
+    }
+
+    /**
+     * @param dryRun If true, request documents will not actually be sent to the iTunes U server.
+     *               This can be used to perform validation on requests only.
+     */
+    public void setDryRun(boolean dryRun) {
+        this.dryRun = dryRun;
     }
 
     /**
