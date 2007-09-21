@@ -42,7 +42,7 @@ import javax.xml.transform.TransformerException;
 
 /**
  * The iTunesU Web Services API connection.
- * 
+ *
  * @author <a href="mailto:ramen@asu.edu">Dave Benjamin</a>
  */
 public class ITunesUConnection {
@@ -57,7 +57,7 @@ public class ITunesUConnection {
 
     /**
      * Constructor.
-     *  
+     *
      * @param siteUrl      The URL to your site in iTunes U. The last
      *                     component of that URL, after the last slash,
      *                     is a domain name that uniquely identifies your
@@ -90,7 +90,7 @@ public class ITunesUConnection {
     /**
      * Sets the identity from user information.
      * Calling this method is optional. All parameters may be null.
-     * 
+     *
      * @param displayName The user's name.
      * @param emailAddress The user's email address.
      * @param username The user's username.
@@ -109,17 +109,17 @@ public class ITunesUConnection {
 
     /**
      * Sets the identity from a string.
-     * 
+     *
      * @param identity The identity as a string.
      */
     public void setIdentity(String identity) {
     	this.identity = identity;
     }
-    
+
     /**
      * Gets the value of the debug flag which determines whether or not to
      * use the debug prefix in requests. This flag is false by default.
-     * 
+     *
      * @return True if the debug prefix is enabled.
      */
     public boolean getDebug() {
@@ -129,7 +129,7 @@ public class ITunesUConnection {
     /**
      * Sets the value of the debug flag which determines whether or not to
      * use the debug prefix in requests.
-     * 
+     *
      * @param debug True to enable the debug prefix, false otherwise.
      */
     public void setDebug(boolean debug) {
@@ -138,7 +138,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves the entire site.
-     * 
+     *
      * @return A {@link Site} model object.
      */
     public Site getSite() throws ITunesUException {
@@ -149,7 +149,7 @@ public class ITunesUConnection {
      * Retrieves the entire site, loading a minimal amount of data.
      * Permissions and tracks are omitted. Only the name and handle
      * attributes are populated.
-     * 
+     *
      * @return A {@link Site} model object.
      */
     public Site getSiteMinimal() throws ITunesUException {
@@ -158,7 +158,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a section by its handle.
-     * 
+     *
      * @param handle The handle of the section.
      * @return A {@link Section} model object.
      */
@@ -168,7 +168,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a division by its handle.
-     * 
+     *
      * @param handle The handle of the division.
      * @return A {@link Division} model object.
      */
@@ -178,7 +178,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a course by its handle.
-     * 
+     *
      * @param handle The handle of the course.
      * @return A {@link Course} model object.
      */
@@ -188,7 +188,7 @@ public class ITunesUConnection {
 
     /**
      * Retrieves a group by its handle.
-     * 
+     *
      * @param handle The handle of the group.
      * @return A {@link Group} model object.
      */
@@ -199,7 +199,7 @@ public class ITunesUConnection {
     /**
      * Updates site information. Same as calling mergeSite() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      */
@@ -212,7 +212,7 @@ public class ITunesUConnection {
     /**
      * Updates site information. Same as calling mergeSite() with
      * destructive set to false.
-     * 
+     *
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -228,7 +228,7 @@ public class ITunesUConnection {
 
     /**
      * Updates site information.
-     * 
+     *
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -258,7 +258,7 @@ public class ITunesUConnection {
 
     /**
      * Adds a division to a section.
-     * 
+     *
      * @param parentHandle Handle for the parent section.
      * @param division Object containing division information.
      */
@@ -273,14 +273,14 @@ public class ITunesUConnection {
         }
 
         arguments.put("Division", division);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddDivision", arguments);
         this.send(null, doc);
     }
 
     /**
      * Deletes a division from a section.
-     * 
+     *
      * @param divisionHandle Handle for the division to delete.
      */
     public void deleteDivision(String divisionHandle)
@@ -299,7 +299,7 @@ public class ITunesUConnection {
     /**
      * Updates division information. Same as calling mergeDivision() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      */
@@ -312,7 +312,7 @@ public class ITunesUConnection {
     /**
      * Updates division information. Same as calling mergeDivision() with
      * destructive set to false.
-     * 
+     *
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -328,7 +328,7 @@ public class ITunesUConnection {
 
     /**
      * Updates division information.
-     * 
+     *
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      * @param mergeByHandle If true, merge sections by handle.
@@ -358,7 +358,7 @@ public class ITunesUConnection {
 
     /**
      * Adds a section to a site or division.
-     * 
+     *
      * @param parentHandle Handle for the parent site or division.
      * @param section Object containing section information.
      */
@@ -373,14 +373,14 @@ public class ITunesUConnection {
         }
 
         arguments.put("Section", section);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddSection", arguments);
         this.send(null, doc);
     }
 
     /**
      * Deletes a section from a site or division.
-     * 
+     *
      * @param sectionHandle Handle for the section to delete.
      */
     public void deleteSection(String sectionHandle)
@@ -399,7 +399,7 @@ public class ITunesUConnection {
     /**
      * Updates section information. Same as calling mergeSection() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      */
@@ -412,7 +412,7 @@ public class ITunesUConnection {
     /**
      * Updates section information. Same as calling mergeSection() with
      * destructive set to false.
-     * 
+     *
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      * @param mergeByHandle If true, merge items by handle.
@@ -428,7 +428,7 @@ public class ITunesUConnection {
 
     /**
      * Updates section information.
-     * 
+     *
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      * @param mergeByHandle If true, merge items by handle.
@@ -458,7 +458,7 @@ public class ITunesUConnection {
 
     /**
      * Adds a course to a section.
-     * 
+     *
      * @param parentHandle Handle for the parent section.
      * @param templateHandle Handle for the course template, or null if none.
      * @param course Object containing course information.
@@ -479,14 +479,14 @@ public class ITunesUConnection {
         }
 
         arguments.put("Course", course);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddCourse", arguments);
         this.send(null, doc);
     }
 
     /**
      * Deletes a course from a section.
-     * 
+     *
      * @param courseHandle Handle for the course to delete.
      */
     public void deleteCourse(String courseHandle)
@@ -505,7 +505,7 @@ public class ITunesUConnection {
     /**
      * Updates course information. Same as calling mergeCourse() with
      * mergeByHandle and destructive set to false.
-     * 
+     *
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      */
@@ -518,7 +518,7 @@ public class ITunesUConnection {
     /**
      * Updates course information. Same as calling mergeCourse() with
      * destructive set to false.
-     * 
+     *
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      * @param mergeByHandle If true, merge groups by handle.
@@ -534,7 +534,7 @@ public class ITunesUConnection {
 
     /**
      * Updates course information.
-     * 
+     *
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      * @param mergeByHandle If true, merge groups by handle.
@@ -564,7 +564,7 @@ public class ITunesUConnection {
 
     /**
      * Adds a group (also called a tab) to a course.
-     * 
+     *
      * @param parentHandle Handle for the parent course.
      * @param group Object containing group information.
      */
@@ -582,7 +582,7 @@ public class ITunesUConnection {
 
     /**
      * Deletes a group from a course.
-     * 
+     *
      * @param groupHandle Handle for the group to delete.
      */
     public void deleteGroup(String groupHandle)
@@ -598,7 +598,7 @@ public class ITunesUConnection {
     /**
      * Updates group information. Same as calling mergeGroup() with
      * destructive set to false.
-     * 
+     *
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information.
      */
@@ -611,7 +611,7 @@ public class ITunesUConnection {
     /**
      * Updates group information. Same as calling mergeGroup() with
      * destructive set to false.
-     * 
+     *
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information.
      * @param mergeByHandle If true, merge tracks by handle.
@@ -627,7 +627,7 @@ public class ITunesUConnection {
 
     /**
      * Updates group information.
-     * 
+     *
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information
      * @param mergeByHandle If true, merge tracks by handle.
@@ -654,7 +654,7 @@ public class ITunesUConnection {
 
     /**
      * Adds a track to a group.
-     * 
+     *
      * @param parentHandle Handle for the parent group.
      * @param track Object containing track information.
      */
@@ -669,14 +669,14 @@ public class ITunesUConnection {
         }
 
         arguments.put("Track", track);
-        
+
         ITunesUDocument doc = new ITunesUDocument("AddTrack", arguments);
         this.send(null, doc);
     }
 
     /**
      * Deletes a track from a group.
-     * 
+     *
      * @param trackHandle Handle for the track to delete.
      */
     public void deleteTrack(String trackHandle)
@@ -694,7 +694,7 @@ public class ITunesUConnection {
 
     /**
      * Updates track information.
-     * 
+     *
      * @param trackHandle Handle for the track to update.
      * @param track Object containing track information.
      */
@@ -716,7 +716,7 @@ public class ITunesUConnection {
 
     /**
      * Adds a permission to a section, course, or group.
-     * 
+     *
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
      */
@@ -735,7 +735,7 @@ public class ITunesUConnection {
 
     /**
      * Deletes a permission from a section, course, or group.
-     * 
+     *
      * @param parentHandle Handle for the parent section, course, or group.
      * @param credential Credential of permission to delete.
      */
@@ -755,7 +755,7 @@ public class ITunesUConnection {
 
     /**
      * Updates a permission.
-     * 
+     *
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
      */
@@ -802,7 +802,7 @@ public class ITunesUConnection {
 
     /**
      * Reads XML for an element by its handle.
-     * 
+     *
      * @param handle Handle of the parent element, or null for the whole site.
      * @return An XML string.
      */
@@ -821,7 +821,7 @@ public class ITunesUConnection {
 
     /**
      * Reads XML for an element by its handle, specifying a key group.
-     * 
+     *
      * @param handle Handle of the parent element, or null for the whole site.
      * @param keyGroup Must be one of: minimal, most, maximal
      * @return An XML string.
@@ -847,10 +847,10 @@ public class ITunesUConnection {
             throw new ITunesUException(e);
         }
     }
-    
+
     /**
      * Reads RSS feed XML for an element by its handle.
-     * 
+     *
      * @param handle Handle of the element.
      * @return An XML string.
      */
@@ -864,9 +864,16 @@ public class ITunesUConnection {
             return iTunesU.invokeAction(url, this.generateToken());
         } catch (AssertionError e) {
             throw new ITunesUException(e);
-        }    	
+        }
     }
-    
+
+    /**
+     * Returns a CSV report of daily activity.
+     *
+     * @param startDate Start date in YYYY-MM-DD format.
+     * @param endDate End date in YYYY-MM-DD format, or null.
+     * @return A string containing CSV data.
+     */
     public String getDailyReportLogs(String startDate, String endDate)
         throws ITunesUException {
 
@@ -890,7 +897,7 @@ public class ITunesUConnection {
 
     /**
      * Generates and returns a new iTunesU upload URL.
-     * 
+     *
      * @param handle Handle for the destination.
      * @param forXml True for uploading XML, false for uploading content.
      * @return The URL as a string.
@@ -907,7 +914,7 @@ public class ITunesUConnection {
         if (forXml) {
             url += "?type=XMLControlFile";
         }
-        
+
         try {
             return iTunesU.invokeAction(url, this.generateToken());
         } catch (AssertionError e) {
@@ -946,9 +953,9 @@ public class ITunesUConnection {
 
     private void send(String handle, ITunesUDocument doc)
         throws ITunesUException {
-    
+
         String result;
-        
+
         try {
             result = this.execute(handle, doc.toXml());
         } catch (ParserConfigurationException e) {
@@ -987,7 +994,7 @@ public class ITunesUConnection {
         String identity = this.identity == null ? "" : this.identity;
         Date now = new Date();
         byte[] key;
-        
+
         try {
             key = sharedSecret.getBytes("US-ASCII");
         } catch (UnsupportedEncodingException e) {
@@ -997,7 +1004,7 @@ public class ITunesUConnection {
         String token = iTunesU.getAuthorizationToken(credentials, identity, now, key);
         return token;
     }
-    
+
     private String getDestination(String handle) {
         String destination = this.getSiteDomain();
 
