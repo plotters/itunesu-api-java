@@ -693,49 +693,13 @@ public class ITunesUConnection {
     }
 
     /**
-     * Updates track information. Same as calling mergeTrack() with
-     * mergeByHandle and destructive set to false.
-     * 
-     * @param trackHandle Handle for the track to update.
-     * @param track Object containing track information.
-     */
-    public void mergeTrack(String trackHandle, Track track)
-        throws ITunesUException {
-
-        this.mergeTrack(trackHandle, track, false, false);
-    }
-
-    /**
-     * Updates track information. Same as calling mergeTrack() with
-     * destructive set to false.
-     * 
-     * @param trackHandle Handle for the track to update.
-     * @param track Object containing track information.
-     * @param mergeByHandle If true, merge items by handle.
-     *                      Otherwise, merge by name.
-     */
-    public void mergeTrack(String trackHandle,
-                           Track track,
-                           boolean mergeByHandle)
-        throws ITunesUException {
-
-        this.mergeTrack(trackHandle, track, mergeByHandle, false);
-    }
-
-    /**
      * Updates track information.
      * 
      * @param trackHandle Handle for the track to update.
      * @param track Object containing track information.
-     * @param mergeByHandle If true, merge items by handle.
-     *                      Otherwise, merge by name.
-     * @param destructive If true, delete any unspecified
-     *                    items or permissions.
      */
     public void mergeTrack(String trackHandle,
-                           Track track,
-                           boolean mergeByHandle,
-                           boolean destructive)
+                           Track track)
         throws ITunesUException {
 
         Map<String, Object> arguments = new HashMap<String, Object>();
@@ -745,8 +709,6 @@ public class ITunesUConnection {
         }
 
         arguments.put("Track", track);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
 
         ITunesUDocument doc = new ITunesUDocument("MergeTrack", arguments);
         this.send(null, doc);
@@ -790,23 +752,6 @@ public class ITunesUConnection {
             new ITunesUDocument("DeletePermission", arguments);
         this.send(null, doc);
     }
-
-    /* This method is in the XSD, but does not appear to work (7-21-2007):
-       No Credential node specified in XML at #document-->ITunesUDocument-->DeletePermission
-
-    public void deletePermission(String parentHandle,
-                                 Permission permission)
-        throws ITunesUException {
-
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("ParentHandle", parentHandle);
-        arguments.put("Permission", permission);
-
-        ITunesUDocument doc = new ITunesUDocument("DeletePermission", arguments);
-        this.send(null, doc);
-    }
-    */
 
     /**
      * Updates a permission.
@@ -922,6 +867,27 @@ public class ITunesUConnection {
         }    	
     }
     
+    public String getDailyReportLogs(String startDate, String endDate)
+        throws ITunesUException {
+
+        ITunesU iTunesU = new ITunesU();
+
+        String url = (this.getPrefix()
+                      + "/API/GetDailyReportLogs/"
+                      + this.getDestination(null)
+                      + "?StartDate=" + startDate);
+
+        if (endDate != null) {
+            url += "&EndDate=" + endDate;
+        }
+
+        try {
+            return iTunesU.invokeAction(url, this.generateToken());
+        } catch (AssertionError e) {
+            throw new ITunesUException(e);
+        }
+    }
+
     /**
      * Generates and returns a new iTunesU upload URL.
      * 
