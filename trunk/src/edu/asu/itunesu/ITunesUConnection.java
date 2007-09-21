@@ -27,14 +27,15 @@
 
 package edu.asu.itunesu;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.mail.MessagingException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -948,6 +949,35 @@ public class ITunesUConnection {
         }
     }
 
+    /**
+     * Uploads file content to iTunesU.
+     *
+     * @param handle Handle for the destination.
+     * @param content A File object containing the content to upload.
+     */
+    public void uploadContent(String handle,
+                              File content) throws ITunesUException {
+        ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
+        String uploadUrl = this.getUploadUrl(handle, false);
+
+        String result;
+
+        try {
+            result = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                  "file",
+                                                  content,
+                                                  "application/octet-stream");
+        } catch (AssertionError e) {
+            throw new ITunesUException(e);
+        } catch (FileNotFoundException e) {
+            throw new ITunesUException(e);
+        }
+
+        if ("!".equals(result)) {
+            throw new ITunesUException("Error uploading content");
+        }
+    }
+
     private void send(String handle, ITunesUDocument doc)
         throws ITunesUException {
     
@@ -979,8 +1009,6 @@ public class ITunesUConnection {
                                                 "file.xml",
                                                 xml,
                                                 "text/xml");
-        } catch (MessagingException e) {
-            throw new ITunesUException(e);
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
