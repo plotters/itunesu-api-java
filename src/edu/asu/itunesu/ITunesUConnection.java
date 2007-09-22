@@ -100,7 +100,7 @@ public class ITunesUConnection {
                             String emailAddress,
                             String username,
                             String userIdentifier) throws ITunesUException {
-    	ITunesU iTunesU = new ITunesU();
+        ITunesU iTunesU = new ITunesU();
         this.identity = iTunesU.getIdentityString(displayName,
                                                   emailAddress,
                                                   username,
@@ -113,7 +113,7 @@ public class ITunesUConnection {
      * @param identity The identity as a string.
      */
     public void setIdentity(String identity) {
-    	this.identity = identity;
+        this.identity = identity;
     }
 
     /**
@@ -988,7 +988,7 @@ public class ITunesUConnection {
     }
 
     private String generateToken() throws ITunesUException {
-    	ITunesU iTunesU = new ITunesU();
+        ITunesU iTunesU = new ITunesU();
 
         String credentials = iTunesU.getCredentialsString(this.credentials);
         String identity = this.identity == null ? "" : this.identity;
