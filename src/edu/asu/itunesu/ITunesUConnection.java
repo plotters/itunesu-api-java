@@ -28,14 +28,14 @@
 package edu.asu.itunesu;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import javax.mail.MessagingException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
@@ -320,7 +320,7 @@ public class ITunesUConnection {
      * @param division Object containing division information.
      */
     public String addDivision(String parentHandle,
-                            Division division)
+                              Division division)
         throws ITunesUException {
 
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
@@ -415,7 +415,7 @@ public class ITunesUConnection {
      * @param section Object containing section information.
      */
     public String addSection(String parentHandle,
-                           Section section)
+                             Section section)
         throws ITunesUException {
 
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
@@ -511,8 +511,8 @@ public class ITunesUConnection {
      * @param course Object containing course information.
      */
     public String addCourse(String parentHandle,
-                          String templateHandle,
-                          Course course)
+                            String templateHandle,
+                            Course course)
         throws ITunesUException {
 
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
@@ -707,7 +707,7 @@ public class ITunesUConnection {
      * @param track Object containing track information.
      */
     public String addTrack(String parentHandle,
-                         Track track)
+                           Track track)
         throws ITunesUException {
 
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
@@ -762,7 +762,7 @@ public class ITunesUConnection {
      * @param permission Object containing permission information.
      */
     public String addPermission(String parentHandle,
-                              Permission permission)
+                                Permission permission)
         throws ITunesUException {
 
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
@@ -898,9 +898,9 @@ public class ITunesUConnection {
 
         ITunesUResponse response = ITunesUResponse.fromXml(responseXml);
         if (response.getError() != null) {
-        	throw new ITunesUException(response.getError());
+            throw new ITunesUException(response.getError());
         } else {
-        	return response.getResultXml();
+            return response.getResultXml();
         }
     }
 
@@ -923,7 +923,16 @@ public class ITunesUConnection {
         }
     }
 
-    public String getDailyReportLogs(String startDate, String endDate) throws ITunesUException {
+    /**
+     * Returns a CSV report of daily activity.
+     *
+     * @param startDate Start date in YYYY-MM-DD format.
+     * @param endDate End date in YYYY-MM-DD format, or null.
+     * @return A string containing CSV data.
+     */
+    public String getDailyReportLogs(String startDate, String endDate)
+        throws ITunesUException {
+
         ITunesU iTunesU = new ITunesU();
 
         String url = (this.getPrefix()
@@ -969,6 +978,35 @@ public class ITunesUConnection {
         }
     }
 
+    /**
+     * Uploads file content to iTunesU.
+     *
+     * @param handle Handle for the destination.
+     * @param content A File object containing the content to upload.
+     */
+    public void uploadContent(String handle,
+                              File content) throws ITunesUException {
+        ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
+        String uploadUrl = this.getUploadUrl(handle, false);
+
+        String result;
+
+        try {
+            result = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                  "file",
+                                                  content,
+                                                  "application/octet-stream");
+        } catch (AssertionError e) {
+            throw new ITunesUException(e);
+        } catch (FileNotFoundException e) {
+            throw new ITunesUException(e);
+        }
+
+        if ("!".equals(result)) {
+            throw new ITunesUException("Error uploading content");
+        }
+    }
+
     private ITunesUResponse send(String handle, ITunesUDocument doc)
         throws ITunesUException {
 
@@ -987,22 +1025,18 @@ public class ITunesUConnection {
         }
         String responseXml = this.execute(handle, requestXml);
         validateResponseXml(responseXml);
-        
+
         ITunesUResponse response = ITunesUResponse.fromXml(responseXml);
         if (response.getError() != null) {
-        	throw new ITunesUException(response.getError());
+            throw new ITunesUException(response.getError());
         } else {
-        	return response;
+            return response;
         }
     }
 
     private void validateRequestXml(String xml) throws ITunesUException {
         if (this.requestValidationXsdPath != null) {
-        	
-        	// debug:
-        	System.out.println("Validating the following XML against " + this.requestValidationXsdPath + "\n" + xml + "\n");
-
-        	SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+            SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
             File schemaLocation = new File(this.requestValidationXsdPath);
             try {
                 Schema schema = factory.newSchema(schemaLocation);
@@ -1019,11 +1053,7 @@ public class ITunesUConnection {
 
     private void validateResponseXml(String xml) throws ITunesUException {
         if (this.responseValidationXsdPath != null) {
-
-        	// debug:
-        	System.out.println("Validating the following XML against " + this.responseValidationXsdPath + "\n" + xml + "\n");
-            
-        	SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+            SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
             File schemaLocation = new File(this.responseValidationXsdPath);
             try {
                 Schema schema = factory.newSchema(schemaLocation);
@@ -1048,8 +1078,6 @@ public class ITunesUConnection {
                                                 "file.xml",
                                                 xml,
                                                 "text/xml");
-        } catch (MessagingException e) {
-            throw new ITunesUException(e);
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
