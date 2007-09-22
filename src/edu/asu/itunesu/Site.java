@@ -55,9 +55,6 @@ import org.xml.sax.SAXException;
 
 /**
  * An entire iTunesU site, composed of many {@link Section} objects.
- * <br><br>
- * Note: Although this class contains writable properties, the iTunesU API
- * does not currently provide any method to update site-level information.
  */
 public class Site implements ITunesUElement {
     private String name;
