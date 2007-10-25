@@ -30,6 +30,7 @@ package edu.asu.itunesu;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
@@ -999,6 +1000,39 @@ public class ITunesUConnection {
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         } catch (FileNotFoundException e) {
+            throw new ITunesUException(e);
+        }
+
+        if ("!".equals(result)) {
+            throw new ITunesUException("Error uploading content");
+        }
+    }
+
+    /**
+     * Uploads file content to iTunesU.
+     *
+     * @param handle Handle for the destination.
+     * @param fileName Name of the file to upload.
+     * @param content Stream of the file content.
+     * @param contentLength Length of the file, in bytes.
+     */
+    public void uploadContent(String handle,
+                              String fileName,
+                              InputStream content,
+                              int contentLength) throws ITunesUException {
+        ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
+        String uploadUrl = this.getUploadUrl(handle, false);
+
+        String result;
+
+        try {
+            result = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                  "file",
+                                                  fileName,
+                                                  content,
+                                                  contentLength,
+                                                  "application/octet-stream");
+        } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
 
