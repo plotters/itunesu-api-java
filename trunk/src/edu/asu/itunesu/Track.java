@@ -168,6 +168,11 @@ public class Track implements ITunesUElement {
             Element nameElement = doc.createElement("Name");
             nameElement.setTextContent(this.name);
             element.appendChild(nameElement);
+            // Workaround for Apple bug - see:
+            // http://discussions.apple.com/thread.jspa?threadID=1228047&tstart=0
+            Element titleElement = doc.createElement("Title");
+            titleElement.setTextContent(this.name);
+            element.appendChild(titleElement);
         }
         if (this.handle != null) {
             Element handleElement = doc.createElement("Handle");
