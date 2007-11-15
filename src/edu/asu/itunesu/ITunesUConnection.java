@@ -164,7 +164,7 @@ public class ITunesUConnection {
      * @return A {@link Section} model object.
      */
     public Section getSection(String handle) throws ITunesUException {
-        return Section.fromXml(this.showTree(handle));
+        return Site.fromXml(this.showTree(handle)).getSections().get(0);
     }
 
     /**
@@ -174,7 +174,7 @@ public class ITunesUConnection {
      * @return A {@link Division} model object.
      */
     public Division getDivision(String handle) throws ITunesUException {
-        return Division.fromXml(this.showTree(handle));
+        return (Division) Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
     }
 
     /**
@@ -184,7 +184,12 @@ public class ITunesUConnection {
      * @return A {@link Course} model object.
      */
     public Course getCourse(String handle) throws ITunesUException {
-        return Course.fromXml(this.showTree(handle));
+        SectionItem sectionItem = Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
+        if (sectionItem instanceof Course) {
+            return (Course) sectionItem;
+        } else {
+            return (Course) ((Division) sectionItem).getSections().get(0).getSectionItems().get(0);
+        }
     }
 
     /**
@@ -194,7 +199,12 @@ public class ITunesUConnection {
      * @return A {@link Group} model object.
      */
     public Group getGroup(String handle) throws ITunesUException {
-        return Group.fromXml(this.showTree(handle));
+        SectionItem sectionItem = Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
+        if (sectionItem instanceof Course) {
+            return ((Course) sectionItem).getGroups().get(0);
+        } else {
+            return ((Course) ((Division) sectionItem).getSections().get(0).getSectionItems().get(0)).getGroups().get(0);
+        }
     }
 
     /**
@@ -814,7 +824,10 @@ public class ITunesUConnection {
         ITunesU iTunesU = new ITunesU();
 
         try {
-            return iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Request URL:\n" + url);
+            String response = iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Response Body:\n" + response);
+            return response;
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
@@ -862,7 +875,10 @@ public class ITunesUConnection {
         ITunesU iTunesU = new ITunesU();
 
         try {
-            return iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Request URL:\n" + url);
+            String response = iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Response Body:\n" + response);
+            return response;
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
@@ -890,7 +906,10 @@ public class ITunesUConnection {
         }
 
         try {
-            return iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Request URL:\n" + url);
+            String response = iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Response Body:\n" + response);
+            return response;
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
@@ -917,7 +936,10 @@ public class ITunesUConnection {
         }
 
         try {
-            return iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Request URL:\n" + url);
+            String response = iTunesU.invokeAction(url, this.generateToken());
+            if (this.debug) System.err.println("Response Body:\n" + response);
+            return response;
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
@@ -1009,13 +1031,19 @@ public class ITunesUConnection {
     private String execute(String handle, String xml)
         throws ITunesUException {
 
+        String url = this.getUploadUrl(handle, true);
+        
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         try {
-            return iTunesUFilePOST.invokeAction(this.getUploadUrl(handle, true),
-                                                "file",
-                                                "file.xml",
-                                                xml,
-                                                "text/xml");
+            if (this.debug) System.err.println("Request URL:\n" + url);
+            if (this.debug) System.err.println("Request Body:\n" + xml);
+            String response = iTunesUFilePOST.invokeAction(url,
+                                                           "file",
+                                                           "file.xml",
+                                                           xml,
+                                                           "text/xml");
+            if (this.debug) System.err.println("Response Body:\n" + response);
+            return response;
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
