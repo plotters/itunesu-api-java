@@ -694,6 +694,9 @@ public class ITunesUConnection {
     public String showTree(String handle, String keyGroup)
         throws ITunesUException {
 
+        if (handle == null) {
+            handle = "";
+        }
         ITunesUDocument doc = ITunesUDocument.buildShowTree(handle, keyGroup);
 
         try {
