@@ -55,6 +55,7 @@ public class Group implements ITunesUElement {
     private List<Track> tracks;
 
     public Group() {
+        this.name = "";
         this.permissions = new ArrayList<Permission>();
         this.tracks = new ArrayList<Track>();
     }
@@ -171,7 +172,7 @@ public class Group implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="

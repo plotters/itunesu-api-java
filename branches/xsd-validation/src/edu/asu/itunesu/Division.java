@@ -51,26 +51,35 @@ import org.w3c.dom.NodeList;
 public class Division implements SectionItem {
     private String name;
     private String handle;
-    private String identifier;
     private String shortName;
+    private String identifier;
+    private Boolean allowSubscription;
     private List<Permission> permissions;
     private List<Section> sections;
 
     public Division() {
+        this.name = "";
+        this.shortName = "";
+        this.identifier = "";
+        this.allowSubscription = Boolean.FALSE;
         this.permissions = new ArrayList<Permission>();
+        this.permissions.add(new Permission("", ""));
         this.sections = new ArrayList<Section>();
+        this.sections.add(new Section());
     }
 
     public Division(String name,
                     String handle,
-                    String identifier,
                     String shortName,
+                    String identifier,
+                    Boolean allowSubscription,
                     List<Permission> permissions,
                     List<Section> sections) {
         this.name = name;
         this.handle = handle;
-        this.identifier = identifier;
         this.shortName = shortName;
+        this.identifier = identifier;
+        this.allowSubscription = allowSubscription;
         this.permissions = permissions;
         this.sections = sections;
     }
@@ -83,12 +92,16 @@ public class Division implements SectionItem {
         return this.handle;
     }
 
+    public String getShortName() {
+        return this.shortName;
+    }
+    
     public String getIdentifier() {
         return this.identifier;
     }
 
-    public String getShortName() {
-        return this.shortName;
+    public Boolean getAllowSubscription() {
+        return this.allowSubscription;
     }
 
     public List<Permission> getPermissions() {
@@ -107,14 +120,18 @@ public class Division implements SectionItem {
         this.handle = handle;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public void setShortName(String shortName) {
         this.shortName = shortName;
     }
 
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public void setAllowSubscription(Boolean allowSubscription) {
+        this.allowSubscription = allowSubscription;
+    }
+    
     public void setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
     }
@@ -135,15 +152,22 @@ public class Division implements SectionItem {
             handleElement.setTextContent(this.handle);
             element.appendChild(handleElement);
         }
+        if (this.shortName != null) {
+            Element shortNameElement = doc.createElement("ShortName");
+            shortNameElement.setTextContent(this.shortName);
+            element.appendChild(shortNameElement);
+        }
         if (this.identifier != null) {
             Element identifierElement = doc.createElement("Identifier");
             identifierElement.setTextContent(this.identifier);
             element.appendChild(identifierElement);
         }
-        if (this.shortName != null) {
-            Element shortNameElement = doc.createElement("ShortName");
-            shortNameElement.setTextContent(this.shortName);
-            element.appendChild(shortNameElement);
+        if (this.allowSubscription != null) {
+            Element allowSubscriptionElement =
+                doc.createElement("AllowSubscription");
+            allowSubscriptionElement.setTextContent(this.allowSubscription
+                                                    ? "true" : "false");
+            element.appendChild(allowSubscriptionElement);
         }
         for (Permission permission : this.permissions) {
             element.appendChild(permission.toXmlElement(doc));
@@ -161,8 +185,9 @@ public class Division implements SectionItem {
         }
         String name = null;
         String handle = null;
-        String identifier = null;
         String shortName = null;
+        String identifier = null;
+        Boolean allowSubscription = false;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
         NodeList childNodes = element.getChildNodes();
@@ -173,10 +198,12 @@ public class Division implements SectionItem {
                     name = childNode.getTextContent();
                 } else if ("Handle".equals(childNode.getNodeName())) {
                     handle = childNode.getTextContent();
-                } else if ("Identifier".equals(childNode.getNodeName())) {
-                    identifier = childNode.getTextContent();
                 } else if ("ShortName".equals(childNode.getNodeName())) {
                     shortName = childNode.getTextContent();
+                } else if ("Identifier".equals(childNode.getNodeName())) {
+                    identifier = childNode.getTextContent();
+                } else if ("AllowSubscription".equals(childNode.getNodeName())) {
+                    allowSubscription = "true".equals(childNode.getTextContent());
                 } else if ("Permission".equals(childNode.getNodeName())) {
                     permissions.add(Permission.fromXmlElement((Element) childNode));
                 } else if ("Section".equals(childNode.getNodeName())) {
@@ -186,8 +213,9 @@ public class Division implements SectionItem {
         }
         return new Division(name,
                             handle,
-                            identifier,
                             shortName,
+                            identifier,
+                            allowSubscription,
                             permissions,
                             sections);
     }
@@ -214,7 +242,7 @@ public class Division implements SectionItem {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="
