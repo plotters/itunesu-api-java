@@ -65,8 +65,14 @@ public class Site implements ITunesUElement {
     private Templates templates;
 
     public Site() {
+        this.name = "";
+        this.handle = "";
+        this.allowSubscription = Boolean.TRUE;
         this.permissions = new ArrayList<Permission>();
+        this.permissions.add(new Permission("", ""));
         this.sections = new ArrayList<Section>();
+        this.sections.add(new Section());
+        this.templates = new Templates();
     }
 
     public Site(String name,
@@ -144,11 +150,11 @@ public class Site implements ITunesUElement {
             element.appendChild(handleElement);
         }
         if (this.allowSubscription != null) {
-        	Element allowSubscriptionElement =
-        		doc.createElement("AllowSubscription");
-        	allowSubscriptionElement.setTextContent(this.allowSubscription
-                                                	? "true" : "false");
-        	element.appendChild(allowSubscriptionElement);
+            Element allowSubscriptionElement =
+                doc.createElement("AllowSubscription");
+            allowSubscriptionElement.setTextContent(this.allowSubscription
+                                                    ? "true" : "false");
+            element.appendChild(allowSubscriptionElement);
         }
         for (Permission permission : this.permissions) {
             element.appendChild(permission.toXmlElement(doc));
@@ -174,6 +180,7 @@ public class Site implements ITunesUElement {
         
         TransformerFactory transFactory = TransformerFactory.newInstance();
         Transformer trans = transFactory.newTransformer();
+        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         trans.setOutputProperty(OutputKeys.INDENT, "yes");
         
         StringWriter writer = new StringWriter();
@@ -244,7 +251,7 @@ public class Site implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="

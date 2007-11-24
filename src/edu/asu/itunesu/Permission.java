@@ -105,7 +105,7 @@ public class Permission implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[credential="
                 + (this.getCredential() == null ? "<null>" : this.getCredential())
                 + ",access="
