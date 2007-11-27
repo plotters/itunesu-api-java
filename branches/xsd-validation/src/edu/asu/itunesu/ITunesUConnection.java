@@ -162,7 +162,12 @@ public class ITunesUConnection {
      * @return A {@link Section} model object.
      */
     public Section getSection(String handle) throws ITunesUException {
-        return Site.fromXml(this.showTree(handle)).getSections().get(0);
+        Section section = Site.fromXml(this.showTree(handle)).getSections().get(0);
+        if (section.getHandle() == null) {
+            return ((Division) section.getSectionItems().get(0)).getSections().get(0);
+        } else {
+            return section;
+        }
     }
 
     /**
