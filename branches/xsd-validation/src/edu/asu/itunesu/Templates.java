@@ -55,11 +55,8 @@ public class Templates implements ITunesUElement {
     private List<SectionItem> sectionItems;
 
     public Templates() {
-        this.name = "";
-        this.handle = "";
         this.permissions = new ArrayList<Permission>();
         this.sectionItems = new ArrayList<SectionItem>();
-        this.sectionItems.add(new Course());
     }
 
     public Templates(String name,

@@ -48,16 +48,7 @@ public class Track implements ITunesUElement {
     private String comment;
     private String downloadUrl;
 
-    public Track() {
-        this.name = "";
-        this.handle = "";
-        this.kind = "";
-        this.discNumber = 1;
-        this.durationMilliseconds = 0L;
-        this.albumName = "";
-        this.artistName = "";
-        this.downloadUrl = "";
-    }
+    public Track() {}
 
     public Track(String name,
                  String handle,

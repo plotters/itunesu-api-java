@@ -58,14 +58,8 @@ public class Division implements SectionItem {
     private List<Section> sections;
 
     public Division() {
-        this.name = "";
-        this.shortName = "";
-        this.identifier = "";
-        this.allowSubscription = Boolean.FALSE;
         this.permissions = new ArrayList<Permission>();
-        this.permissions.add(new Permission("", ""));
         this.sections = new ArrayList<Section>();
-        this.sections.add(new Section());
     }
 
     public Division(String name,

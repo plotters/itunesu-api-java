@@ -65,14 +65,8 @@ public class Site implements ITunesUElement {
     private Templates templates;
 
     public Site() {
-        this.name = "";
-        this.handle = "";
-        this.allowSubscription = Boolean.TRUE;
         this.permissions = new ArrayList<Permission>();
-        this.permissions.add(new Permission("", ""));
         this.sections = new ArrayList<Section>();
-        this.sections.add(new Section());
-        this.templates = new Templates();
     }
 
     public Site(String name,

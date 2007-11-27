@@ -55,11 +55,8 @@ public class Section implements ITunesUElement {
     private List<SectionItem> sectionItems;
 
     public Section() {
-        this.name = "";
-        this.handle = "";
         this.permissions = new ArrayList<Permission>();
         this.sectionItems = new ArrayList<SectionItem>();
-        this.sectionItems.add(new Course());
     }
 
     public Section(String name,

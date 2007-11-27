@@ -51,23 +51,22 @@ import org.w3c.dom.NodeList;
 public class Group implements ITunesUElement {
     private String name;
     private String handle;
-    private List<Permission> permissions;
     private List<Track> tracks;
+    private List<Permission> permissions;
 
     public Group() {
-        this.name = "";
-        this.permissions = new ArrayList<Permission>();
         this.tracks = new ArrayList<Track>();
+        this.permissions = new ArrayList<Permission>();
     }
 
     public Group(String name,
                  String handle,
-                 List<Permission> permissions,
-                 List<Track> tracks) {
+                 List<Track> tracks,
+                 List<Permission> permissions) {
         this.name = name;
         this.handle = handle;
-        this.permissions = permissions;
         this.tracks = tracks;
+        this.permissions = permissions;
     }
 
     public String getName() {
@@ -78,12 +77,12 @@ public class Group implements ITunesUElement {
         return this.handle;
     }
 
-    public List<Permission> getPermissions() {
-        return this.permissions;
-    }
-
     public List<Track> getTracks() {
         return this.tracks;
+    }
+
+    public List<Permission> getPermissions() {
+        return this.permissions;
     }
 
     public void setName(String name) {
@@ -94,12 +93,12 @@ public class Group implements ITunesUElement {
         this.handle = handle;
     }
 
-    public void setPermissions(List<Permission> permissions) {
-        this.permissions = permissions;
-    }
-
     public void setTracks(List<Track> tracks) {
         this.tracks = tracks;
+    }
+
+    public void setPermissions(List<Permission> permissions) {
+        this.permissions = permissions;
     }
 
     public Element toXmlElement(Document doc) {
@@ -114,11 +113,11 @@ public class Group implements ITunesUElement {
             handleElement.setTextContent(this.handle);
             element.appendChild(handleElement);
         }
-        for (Permission permission : this.permissions) {
-            element.appendChild(permission.toXmlElement(doc));
-        }
         for (Track track : this.tracks) {
             element.appendChild(track.toXmlElement(doc));
+        }
+        for (Permission permission : this.permissions) {
+            element.appendChild(permission.toXmlElement(doc));
         }
         return element;
     }
@@ -130,8 +129,8 @@ public class Group implements ITunesUElement {
         }
         String name = null;
         String handle = null;
-        List<Permission> permissions = new ArrayList<Permission>();
         List<Track> tracks = new ArrayList<Track>();
+        List<Permission> permissions = new ArrayList<Permission>();
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -140,14 +139,14 @@ public class Group implements ITunesUElement {
                     name = childNode.getTextContent();
                 } else if ("Handle".equals(childNode.getNodeName())) {
                     handle = childNode.getTextContent();
-                } else if ("Permission".equals(childNode.getNodeName())) {
-                    permissions.add(Permission.fromXmlElement((Element) childNode));
                 } else if ("Track".equals(childNode.getNodeName())) {
                     tracks.add(Track.fromXmlElement((Element) childNode));
+                } else if ("Permission".equals(childNode.getNodeName())) {
+                    permissions.add(Permission.fromXmlElement((Element) childNode));
                 }
             }
         }
-        return new Group(name, handle, permissions, tracks);
+        return new Group(name, handle, tracks, permissions);
     }
 
     public static Group fromXml(String xml)

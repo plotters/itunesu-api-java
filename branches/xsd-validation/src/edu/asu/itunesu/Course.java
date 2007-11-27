@@ -51,8 +51,8 @@ import org.w3c.dom.NodeList;
 public class Course implements SectionItem {
     private String name;
     private String handle;
-    private String identifier;
     private String shortName;
+    private String identifier;
     private String instructor;
     private String description;
     private List<Permission> permissions;
@@ -65,16 +65,16 @@ public class Course implements SectionItem {
 
     public Course(String name,
                   String handle,
-                  String identifier,
                   String shortName,
+                  String identifier,
                   String instructor,
                   String description,
                   List<Permission> permissions,
                   List<Group> groups) {
         this.name = name;
         this.handle = handle;
-        this.identifier = identifier;
         this.shortName = shortName;
+        this.identifier = identifier;
         this.instructor = instructor;
         this.description = description;
         this.permissions = permissions;
@@ -89,12 +89,12 @@ public class Course implements SectionItem {
         return this.handle;
     }
 
-    public String getIdentifier() {
-        return this.identifier;
-    }
-
     public String getShortName() {
         return this.shortName;
+    }
+
+    public String getIdentifier() {
+        return this.identifier;
     }
 
     public String getInstructor() {
@@ -121,12 +121,12 @@ public class Course implements SectionItem {
         this.handle = handle;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public void setShortName(String shortName) {
         this.shortName = shortName;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public void setInstructor(String instructor) {
@@ -157,15 +157,15 @@ public class Course implements SectionItem {
             handleElement.setTextContent(this.handle);
             element.appendChild(handleElement);
         }
-        if (this.identifier != null) {
-            Element identifierElement = doc.createElement("Identifier");
-            identifierElement.setTextContent(this.identifier);
-            element.appendChild(identifierElement);
-        }
         if (this.shortName != null) {
             Element shortNameElement = doc.createElement("ShortName");
             shortNameElement.setTextContent(this.shortName);
             element.appendChild(shortNameElement);
+        }
+        if (this.identifier != null) {
+            Element identifierElement = doc.createElement("Identifier");
+            identifierElement.setTextContent(this.identifier);
+            element.appendChild(identifierElement);
         }
         if (this.instructor != null) {
             Element instructorElement = doc.createElement("Instructor");
@@ -193,8 +193,8 @@ public class Course implements SectionItem {
         }
         String name = null;
         String handle = null;
-        String identifier = null;
         String shortName = null;
+        String identifier = null;
         String instructor = null;
         String description = null;
         List<Permission> permissions = new ArrayList<Permission>();
@@ -207,10 +207,10 @@ public class Course implements SectionItem {
                     name = childNode.getTextContent();
                 } else if ("Handle".equals(childNode.getNodeName())) {
                     handle = childNode.getTextContent();
-                } else if ("Identifier".equals(childNode.getNodeName())) {
-                    identifier = childNode.getTextContent();
                 } else if ("ShortName".equals(childNode.getNodeName())) {
                     shortName = childNode.getTextContent();
+                } else if ("Identifier".equals(childNode.getNodeName())) {
+                    identifier = childNode.getTextContent();
                 } else if ("Instructor".equals(childNode.getNodeName())) {
                     instructor = childNode.getTextContent();
                 } else if ("Description".equals(childNode.getNodeName())) {
@@ -224,8 +224,8 @@ public class Course implements SectionItem {
         }
         return new Course(name,
                           handle,
-                          identifier,
                           shortName,
+                          identifier,
                           instructor,
                           description,
                           permissions,
