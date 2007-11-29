@@ -883,7 +883,7 @@ public class ITunesUConnection {
         throws ITunesUException {
 
         String url = this.getUploadUrl(handle, true);
-        
+
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         try {
             if (this.debug) System.err.println("Request URL:\n" + url);

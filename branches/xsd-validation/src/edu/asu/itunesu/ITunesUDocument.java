@@ -49,7 +49,7 @@ import org.w3c.dom.Element;
 
 public class ITunesUDocument {
     public static final String VERSION = "1.0.2";
-    
+
     private String method;
     private Map<String, Object> arguments;
 
@@ -85,7 +85,7 @@ public class ITunesUDocument {
         Element version = doc.createElement("Version");
         version.setTextContent(VERSION);
         root.appendChild(version);
-        
+
         Element method = doc.createElement(this.method);
         root.appendChild(method);
 
@@ -202,7 +202,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("MergeSection", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildAddCourse(String parentHandle, String templateHandle, Course course) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
@@ -242,7 +242,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("AddGroup", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildDeleteGroup(String groupHandle) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("GroupHandle", groupHandle);
@@ -261,7 +261,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("MergeGroup", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildAddTrack(String parentHandle, Track track) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
@@ -277,7 +277,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("DeleteTrack", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildMergeTrack(String trackHandle, Track track) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("TrackHandle", trackHandle);
@@ -285,7 +285,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("MergeTrack", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildAddPermission(String parentHandle, Permission permission) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
@@ -303,7 +303,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("DeletePermission", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildMergePermission(String parentHandle, Permission permission) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
@@ -312,7 +312,7 @@ public class ITunesUDocument {
         ITunesUDocument doc = new ITunesUDocument("MergePermission", arguments);
         return doc;
     }
-    
+
     public static ITunesUDocument buildAddCredential(String credential) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("Credential", credential);

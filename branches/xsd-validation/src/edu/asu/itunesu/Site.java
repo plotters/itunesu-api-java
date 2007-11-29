@@ -169,22 +169,22 @@ public class Site implements ITunesUElement {
             DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
         Document doc = docBuilder.newDocument();
-        
+
         doc.appendChild(this.toXmlElement(doc));
-        
+
         TransformerFactory transFactory = TransformerFactory.newInstance();
         Transformer trans = transFactory.newTransformer();
         trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        
+
         StringWriter writer = new StringWriter();
         StreamResult result = new StreamResult(writer);
         DOMSource source = new DOMSource(doc);
         trans.transform(source, result);
-        
+
         return writer.toString();
     }
-    
+
     public static Site fromXmlElement(Element element) throws ITunesUException {
         if (!"Site".equals(element.getNodeName())) {
             throw new ITunesUException("Expected Site, got "

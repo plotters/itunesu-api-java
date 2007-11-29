@@ -104,7 +104,7 @@ class ITunesUFilePOST {
             }
 
             String boundary = createBoundary();
-            
+
             byte[] header = ("--" + boundary + "\r\n"
                              + "Content-Disposition: form-data; name=\"" + name
                              + "\"; filename=\"" + fileName + "\"\r\n"

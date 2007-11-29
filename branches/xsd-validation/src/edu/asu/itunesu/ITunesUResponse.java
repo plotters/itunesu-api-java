@@ -49,22 +49,22 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 class ITunesUResponse {
-	private String version;
-	private String error;
-	private String addedObjectHandle;
-	private String resultXml;
+    private String version;
+    private String error;
+    private String addedObjectHandle;
+    private String resultXml;
 
-	public ITunesUResponse() {}
+    public ITunesUResponse() {}
 
-	public ITunesUResponse(String version,
+    public ITunesUResponse(String version,
                            String error,
                            String addedObjectHandle,
                            String resultXml) {
-		this.version = version;
-		this.error = error;
-		this.addedObjectHandle = addedObjectHandle;
-		this.resultXml = resultXml;
-	}
+        this.version = version;
+        this.error = error;
+        this.addedObjectHandle = addedObjectHandle;
+        this.resultXml = resultXml;
+    }
 
     public String getVersion() {
         return this.version;
@@ -118,29 +118,29 @@ class ITunesUResponse {
                 } else if ("AddedObjectHandle".equals(childNode.getNodeName())) {
                     addedObjectHandle = childNode.getTextContent();
                 } else {
-                	try {
-	                	Element siteElement = (Element) childNode;
+                    try {
+                        Element siteElement = (Element) childNode;
 
-	                    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-	                    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-	                    Document doc = docBuilder.newDocument();
-	                	doc.appendChild(doc.importNode(siteElement, true));
+                        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+                        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                        Document doc = docBuilder.newDocument();
+                        doc.appendChild(doc.importNode(siteElement, true));
 
-	                    TransformerFactory transFactory = TransformerFactory.newInstance();
-	                    Transformer trans = transFactory.newTransformer();
-	                    trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                        TransformerFactory transFactory = TransformerFactory.newInstance();
+                        Transformer trans = transFactory.newTransformer();
+                        trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
-	                    StringWriter writer = new StringWriter();
-	                    StreamResult result = new StreamResult(writer);
-	                    DOMSource source = new DOMSource(doc);
-	                    trans.transform(source, result);
+                        StringWriter writer = new StringWriter();
+                        StreamResult result = new StreamResult(writer);
+                        DOMSource source = new DOMSource(doc);
+                        trans.transform(source, result);
 
-	                    resultXml = writer.toString();
-                	} catch (TransformerException e) {
-                		throw new ITunesUException(e);
-                	} catch (ParserConfigurationException e) {
-                		throw new ITunesUException(e);
-					}
+                        resultXml = writer.toString();
+                    } catch (TransformerException e) {
+                        throw new ITunesUException(e);
+                    } catch (ParserConfigurationException e) {
+                        throw new ITunesUException(e);
+                    }
                 }
             }
         }
