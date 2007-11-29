@@ -191,7 +191,7 @@ public class XsdTest extends TestCase {
         course.setDescription("");
         course.getGroups().add(sampleGroup());
         course.setAllowSubscription(true);
-        // course.setThemeHandle(""); - NOT IMPLEMENTED
+        course.setThemeHandle("");
         return course;
     }
 
@@ -203,7 +203,7 @@ public class XsdTest extends TestCase {
         division.setAllowSubscription(false);
         division.getPermissions().add(new Permission("", ""));
         division.getSections().add(sampleSection());
-        // division.setThemeHandle(""); - NOT IMPLEMENTED
+        division.setThemeHandle("");
         return division;
     }
 
@@ -232,7 +232,7 @@ public class XsdTest extends TestCase {
         site.getPermissions().add(new Permission("", ""));
         site.getSections().add(sampleSection());
         site.setTemplates(sampleTemplates());
-        // site.setThemeHandle(""); - NOT IMPLEMENTED
+        site.setThemeHandle("");
         return site;
     }
 
