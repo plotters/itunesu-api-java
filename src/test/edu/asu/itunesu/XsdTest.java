@@ -69,7 +69,7 @@ public class XsdTest extends TestCase {
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
 
-	public void testDeleteDivision() throws Exception {
+    public void testDeleteDivision() throws Exception {
         ITunesUDocument doc = ITunesUDocument.buildDeleteDivision("123456");
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
@@ -182,70 +182,70 @@ public class XsdTest extends TestCase {
     }
 
     private static Course sampleCourse() {
-    	Course course = new Course();
-    	course.setName("");
-    	// course.setHandle(""); - NOT AVAILABLE IN XSD
-    	course.setShortName("");
-    	course.setIdentifier("");
-    	course.setInstructor("");
-    	course.setDescription("");
-    	course.getGroups().add(sampleGroup());
-    	// course.setAllowSubscription(true); - NOT IMPLEMENTED
-    	// course.setThemeHandle(""); - NOT IMPLEMENTED
-    	return course;
+        Course course = new Course();
+        course.setName("");
+        // course.setHandle(""); - NOT AVAILABLE IN XSD
+        course.setShortName("");
+        course.setIdentifier("");
+        course.setInstructor("");
+        course.setDescription("");
+        course.getGroups().add(sampleGroup());
+        // course.setAllowSubscription(true); - NOT IMPLEMENTED
+        // course.setThemeHandle(""); - NOT IMPLEMENTED
+        return course;
     }
-    
+
     private static Division sampleDivision() {
-    	Division division = new Division();
-    	division.setName("");
-    	division.setShortName("");
-    	division.setIdentifier("");
-    	division.setAllowSubscription(false);
-    	division.getPermissions().add(new Permission("", ""));
-    	division.getSections().add(sampleSection());
-    	// division.setThemeHandle(""); - NOT IMPLEMENTED
-		return division;
-	}
-    
+        Division division = new Division();
+        division.setName("");
+        division.setShortName("");
+        division.setIdentifier("");
+        division.setAllowSubscription(false);
+        division.getPermissions().add(new Permission("", ""));
+        division.getSections().add(sampleSection());
+        // division.setThemeHandle(""); - NOT IMPLEMENTED
+        return division;
+    }
+
     private static Group sampleGroup() {
-    	Group group = new Group();
-    	group.setName("");
-    	group.setHandle("");
-    	group.getTracks().add(sampleTrack());
-    	group.getPermissions().add(new Permission("", ""));
-    	return group;
+        Group group = new Group();
+        group.setName("");
+        group.setHandle("");
+        group.getTracks().add(sampleTrack());
+        group.getPermissions().add(new Permission("", ""));
+        return group;
     }
-    
+
     private static Section sampleSection() {
-    	Section section = new Section();
-    	section.setName("");
-    	section.setHandle("");
-    	section.getSectionItems().add(sampleCourse());
-    	return section;
+        Section section = new Section();
+        section.setName("");
+        section.setHandle("");
+        section.getSectionItems().add(sampleCourse());
+        return section;
     }
-    
+
     private static Site sampleSite() {
-    	Site site = new Site();
-    	site.setName("");
-    	site.setHandle("");
-    	site.setAllowSubscription(true);
-    	site.getPermissions().add(new Permission("", ""));
-    	site.getSections().add(sampleSection());
-    	site.setTemplates(sampleTemplates());
-    	// site.setThemeHandle(""); - NOT IMPLEMENTED
-    	return site;
+        Site site = new Site();
+        site.setName("");
+        site.setHandle("");
+        site.setAllowSubscription(true);
+        site.getPermissions().add(new Permission("", ""));
+        site.getSections().add(sampleSection());
+        site.setTemplates(sampleTemplates());
+        // site.setThemeHandle(""); - NOT IMPLEMENTED
+        return site;
     }
-    
+
     private static Templates sampleTemplates() {
-    	Templates templates = new Templates();
-    	templates.setName("");
-    	templates.setHandle("");
-    	templates.getSectionItems().add(sampleCourse());
-    	return templates;
+        Templates templates = new Templates();
+        templates.setName("");
+        templates.setHandle("");
+        templates.getSectionItems().add(sampleCourse());
+        return templates;
     }
-    
+
     private static Track sampleTrack() {
-    	Track track = new Track();
+        Track track = new Track();
         track.setName("");
         track.setHandle("");
         track.setKind("");
@@ -254,6 +254,6 @@ public class XsdTest extends TestCase {
         track.setAlbumName("");
         track.setArtistName("");
         track.setDownloadUrl("");
-    	return track;
+        return track;
     }
 }
