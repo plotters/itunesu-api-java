@@ -48,22 +48,22 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-class ITunesUResponse {
+public class ITunesUResponse {
     private String version;
     private String error;
     private String addedObjectHandle;
-    private String resultXml;
+    private Site site;
 
     public ITunesUResponse() {}
 
     public ITunesUResponse(String version,
                            String error,
                            String addedObjectHandle,
-                           String resultXml) {
+                           Site site) {
         this.version = version;
         this.error = error;
         this.addedObjectHandle = addedObjectHandle;
-        this.resultXml = resultXml;
+        this.site = site;
     }
 
     public String getVersion() {
@@ -78,8 +78,8 @@ class ITunesUResponse {
         return this.addedObjectHandle;
     }
 
-    public String getResultXml() {
-        return this.resultXml;
+    public Site getSite() {
+        return this.site;
     }
 
     public void setVersion(String version) {
@@ -94,8 +94,54 @@ class ITunesUResponse {
         this.addedObjectHandle = addedObjectHandle;
     }
 
-    public void setResultXml(String resultXml) {
-        this.resultXml = resultXml;
+    public void setSite(Site site) {
+        this.site = site;
+    }
+
+    public Element toXmlElement(Document doc) {
+        Element element = doc.createElement("ITunesUResponse");
+        if (this.version != null) {
+            Element versionElement = doc.createElement("Version");
+            versionElement.setTextContent(this.version);
+            element.appendChild(versionElement);
+        }
+        if (this.error != null) {
+            Element errorElement = doc.createElement("error");
+            errorElement.setTextContent(this.error);
+            element.appendChild(errorElement);
+        }
+        if (this.addedObjectHandle != null) {
+            Element addedObjectHandleElement = doc.createElement("AddedObjectHandle");
+            addedObjectHandleElement.setTextContent(this.addedObjectHandle);
+            element.appendChild(addedObjectHandleElement);
+        }
+        if (this.site != null) {
+            element.appendChild(site.toXmlElement(doc));
+        }
+        return element;
+    }
+
+    public String toXml()
+        throws ParserConfigurationException,
+               TransformerException {
+        DocumentBuilderFactory docFactory =
+            DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+
+        doc.appendChild(this.toXmlElement(doc));
+
+        TransformerFactory transFactory = TransformerFactory.newInstance();
+        Transformer trans = transFactory.newTransformer();
+        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        trans.setOutputProperty(OutputKeys.INDENT, "yes");
+
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
+        DOMSource source = new DOMSource(doc);
+        trans.transform(source, result);
+
+        return writer.toString();
     }
 
     public static ITunesUResponse fromXmlElement(Element element) throws ITunesUException {
@@ -106,7 +152,7 @@ class ITunesUResponse {
         String version = null;
         String error = null;
         String addedObjectHandle = null;
-        String resultXml = null;
+        Site site = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -118,33 +164,11 @@ class ITunesUResponse {
                 } else if ("AddedObjectHandle".equals(childNode.getNodeName())) {
                     addedObjectHandle = childNode.getTextContent();
                 } else {
-                    try {
-                        Element siteElement = (Element) childNode;
-
-                        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                        Document doc = docBuilder.newDocument();
-                        doc.appendChild(doc.importNode(siteElement, true));
-
-                        TransformerFactory transFactory = TransformerFactory.newInstance();
-                        Transformer trans = transFactory.newTransformer();
-                        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-
-                        StringWriter writer = new StringWriter();
-                        StreamResult result = new StreamResult(writer);
-                        DOMSource source = new DOMSource(doc);
-                        trans.transform(source, result);
-
-                        resultXml = writer.toString();
-                    } catch (TransformerException e) {
-                        throw new ITunesUException(e);
-                    } catch (ParserConfigurationException e) {
-                        throw new ITunesUException(e);
-                    }
+                    site = Site.fromXmlElement((Element) childNode);
                 }
             }
         }
-        return new ITunesUResponse(version, error, addedObjectHandle, resultXml);
+        return new ITunesUResponse(version, error, addedObjectHandle, site);
     }
 
     public static ITunesUResponse fromXml(String xml) throws ITunesUException {

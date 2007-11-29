@@ -235,9 +235,9 @@ public class Track implements ITunesUElement {
         String name = null;
         String handle = null;
         String kind = null;
-        Integer trackNumber = 0;
-        Integer discNumber = 1;
-        Long durationMilliseconds = 0L;
+        Integer trackNumber = null;
+        Integer discNumber = null;
+        Long durationMilliseconds = null;
         String albumName = null;
         String artistName = null;
         String genreName = null;
