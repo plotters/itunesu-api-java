@@ -57,6 +57,7 @@ public class Course implements SectionItem {
     private String description;
     private List<Permission> permissions;
     private List<Group> groups;
+    private Boolean allowSubscription;
 
     public Course() {
         this.permissions = new ArrayList<Permission>();
@@ -70,7 +71,8 @@ public class Course implements SectionItem {
                   String instructor,
                   String description,
                   List<Permission> permissions,
-                  List<Group> groups) {
+                  List<Group> groups,
+                  Boolean allowSubscription) {
         this.name = name;
         this.handle = handle;
         this.shortName = shortName;
@@ -79,6 +81,7 @@ public class Course implements SectionItem {
         this.description = description;
         this.permissions = permissions;
         this.groups = groups;
+        this.allowSubscription = allowSubscription;
     }
 
     public String getName() {
@@ -113,6 +116,10 @@ public class Course implements SectionItem {
         return this.groups;
     }
 
+    public Boolean getAllowSubscription() {
+        return this.allowSubscription;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -143,6 +150,10 @@ public class Course implements SectionItem {
 
     public void setGroups(List<Group> groups) {
         this.groups = groups;
+    }
+
+    public void setAllowSubscription(Boolean allowSubscription) {
+        this.allowSubscription = allowSubscription;
     }
 
     public Element toXmlElement(Document doc) {
@@ -183,6 +194,13 @@ public class Course implements SectionItem {
         for (Group group : this.groups) {
             element.appendChild(group.toXmlElement(doc));
         }
+        if (this.allowSubscription != null) {
+            Element allowSubscriptionElement =
+                doc.createElement("AllowSubscription");
+            allowSubscriptionElement.setTextContent(this.allowSubscription
+                                                    ? "true" : "false");
+            element.appendChild(allowSubscriptionElement);
+        }
         return element;
     }
 
@@ -199,6 +217,7 @@ public class Course implements SectionItem {
         String description = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Group> groups = new ArrayList<Group>();
+        Boolean allowSubscription = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -219,6 +238,8 @@ public class Course implements SectionItem {
                     permissions.add(Permission.fromXmlElement((Element) childNode));
                 } else if ("Group".equals(childNode.getNodeName())) {
                     groups.add(Group.fromXmlElement((Element) childNode));
+                } else if ("AllowSubscription".equals(childNode.getNodeName())) {
+                    allowSubscription = "true".equals(childNode.getTextContent());
                 }
             }
         }
@@ -229,7 +250,8 @@ public class Course implements SectionItem {
                           instructor,
                           description,
                           permissions,
-                          groups);
+                          groups,
+                          allowSubscription);
     }
 
     public static Course fromXml(String xml)

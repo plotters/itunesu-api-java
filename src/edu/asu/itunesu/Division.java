@@ -181,7 +181,7 @@ public class Division implements SectionItem {
         String handle = null;
         String shortName = null;
         String identifier = null;
-        Boolean allowSubscription = false;
+        Boolean allowSubscription = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
         NodeList childNodes = element.getChildNodes();

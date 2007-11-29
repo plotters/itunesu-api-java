@@ -192,7 +192,7 @@ public class Site implements ITunesUElement {
         }
         String name = null;
         String handle = null;
-        Boolean allowSubscription = false;
+        Boolean allowSubscription = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
         Templates templates = null;
