@@ -63,6 +63,7 @@ public class Site implements ITunesUElement {
     private List<Permission> permissions;
     private List<Section> sections;
     private Templates templates;
+    private String themeHandle;
 
     public Site() {
         this.permissions = new ArrayList<Permission>();
@@ -74,13 +75,15 @@ public class Site implements ITunesUElement {
                 Boolean allowSubscription,
                 List<Permission> permissions,
                 List<Section> sections,
-                Templates templates) {
+                Templates templates,
+                String themeHandle) {
         this.name = name;
         this.handle = handle;
         this.allowSubscription = allowSubscription;
         this.permissions = permissions;
         this.sections = sections;
         this.templates = templates;
+        this.themeHandle = themeHandle;
     }
 
     public String getName() {
@@ -107,6 +110,10 @@ public class Site implements ITunesUElement {
         return this.templates;
     }
 
+    public String getThemeHandle() {
+        return this.themeHandle;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -129,6 +136,10 @@ public class Site implements ITunesUElement {
 
     public void setTemplates(Templates templates) {
         this.templates = templates;
+    }
+
+    public void setThemeHandle(String themeHandle) {
+        this.themeHandle = themeHandle;
     }
 
     public Element toXmlElement(Document doc) {
@@ -158,6 +169,11 @@ public class Site implements ITunesUElement {
         }
         if (this.templates != null) {
             element.appendChild(this.templates.toXmlElement(doc));
+        }
+        if (this.themeHandle != null) {
+            Element themeHandleElement = doc.createElement("ThemeHandle");
+            themeHandleElement.setTextContent(this.themeHandle);
+            element.appendChild(themeHandleElement);
         }
         return element;
     }
@@ -196,6 +212,7 @@ public class Site implements ITunesUElement {
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
         Templates templates = null;
+        String themeHandle = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -212,6 +229,8 @@ public class Site implements ITunesUElement {
                     sections.add(Section.fromXmlElement((Element) childNode));
                 } else if ("Templates".equals(childNode.getNodeName())) {
                     templates = Templates.fromXmlElement((Element) childNode);
+                } else if ("ThemeHandle".equals(childNode.getNodeName())) {
+                    themeHandle = childNode.getTextContent();
                 }
             }
         }
@@ -220,7 +239,8 @@ public class Site implements ITunesUElement {
                         allowSubscription,
                         permissions,
                         sections,
-                        templates);
+                        templates,
+                        themeHandle);
     }
 
     public static Site fromXml(String xml)

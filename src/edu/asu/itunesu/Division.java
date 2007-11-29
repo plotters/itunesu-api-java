@@ -56,6 +56,7 @@ public class Division implements SectionItem {
     private Boolean allowSubscription;
     private List<Permission> permissions;
     private List<Section> sections;
+    private String themeHandle;
 
     public Division() {
         this.permissions = new ArrayList<Permission>();
@@ -68,7 +69,8 @@ public class Division implements SectionItem {
                     String identifier,
                     Boolean allowSubscription,
                     List<Permission> permissions,
-                    List<Section> sections) {
+                    List<Section> sections,
+                    String themeHandle) {
         this.name = name;
         this.handle = handle;
         this.shortName = shortName;
@@ -76,6 +78,7 @@ public class Division implements SectionItem {
         this.allowSubscription = allowSubscription;
         this.permissions = permissions;
         this.sections = sections;
+        this.themeHandle = themeHandle;
     }
 
     public String getName() {
@@ -106,6 +109,10 @@ public class Division implements SectionItem {
         return this.sections;
     }
 
+    public String getThemeHandle() {
+        return this.themeHandle;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -132,6 +139,10 @@ public class Division implements SectionItem {
 
     public void setSections(List<Section> sections) {
         this.sections = sections;
+    }
+
+    public void setThemeHandle(String themeHandle) {
+        this.themeHandle = themeHandle;
     }
 
     public Element toXmlElement(Document doc) {
@@ -169,6 +180,11 @@ public class Division implements SectionItem {
         for (Section section : this.sections) {
             element.appendChild(section.toXmlElement(doc));
         }
+        if (this.themeHandle != null) {
+            Element themeHandleElement = doc.createElement("ThemeHandle");
+            themeHandleElement.setTextContent(this.themeHandle);
+            element.appendChild(themeHandleElement);
+        }
         return element;
     }
 
@@ -184,6 +200,7 @@ public class Division implements SectionItem {
         Boolean allowSubscription = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
+        String themeHandle = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -202,6 +219,8 @@ public class Division implements SectionItem {
                     permissions.add(Permission.fromXmlElement((Element) childNode));
                 } else if ("Section".equals(childNode.getNodeName())) {
                     sections.add(Section.fromXmlElement((Element) childNode));
+                } else if ("ThemeHandle".equals(childNode.getNodeName())) {
+                    themeHandle = childNode.getTextContent();
                 }
             }
         }
@@ -211,7 +230,8 @@ public class Division implements SectionItem {
                             identifier,
                             allowSubscription,
                             permissions,
-                            sections);
+                            sections,
+                            themeHandle);
     }
 
     public static Division fromXml(String xml)
