@@ -17,6 +17,7 @@ import edu.asu.itunesu.Course;
 import edu.asu.itunesu.Division;
 import edu.asu.itunesu.Group;
 import edu.asu.itunesu.ITunesUDocument;
+import edu.asu.itunesu.ITunesUResponse;
 import edu.asu.itunesu.Permission;
 import edu.asu.itunesu.Section;
 import edu.asu.itunesu.Site;
@@ -39,11 +40,11 @@ public class XsdTest extends TestCase {
     }
 
     private Validator requestValidator;
-    // private Validator responseValidator;
+    private Validator responseValidator;
 
     public void setUp() throws Exception {
         this.requestValidator = buildValidator(REQUEST_XSD_PATH);
-        // this.responseValidator = buildValidator(RESPONSE_XSD_PATH);
+        this.responseValidator = buildValidator(RESPONSE_XSD_PATH);
     }
 
     public void testShowTree() throws Exception {
@@ -180,80 +181,113 @@ public class XsdTest extends TestCase {
         ITunesUDocument doc = ITunesUDocument.buildDeleteCredential("credential");
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
+    
+    public void testResponseEmpty() throws Exception {
+        ITunesUResponse resp = new ITunesUResponse();
+        this.responseValidator.validate(buildSource(resp.toXml()));
+    }
+
+    public void testResponseHandle() throws Exception {
+        ITunesUResponse resp = new ITunesUResponse();
+        resp.setVersion("1.0.2");
+        resp.setAddedObjectHandle("123456");
+        this.responseValidator.validate(buildSource(resp.toXml()));
+    }
+
+    public void testResponseError() throws Exception {
+        ITunesUResponse resp = new ITunesUResponse();
+        resp.setVersion("1.0.2");
+        resp.setError("Something went wrong.");
+        this.responseValidator.validate(buildSource(resp.toXml()));
+    }
+    
+    public void testResponseSite() throws Exception {
+        ITunesUResponse resp = new ITunesUResponse("1.0.2", null, null, sampleSite());
+        this.responseValidator.validate(buildSource(resp.toXml()));
+    }
+
+    public void testResponseRoundTrip() throws Exception {
+        ITunesUResponse resp = new ITunesUResponse("1.0.2", "error", "123456", sampleSite());
+        String xml1 = resp.toXml();
+        resp = ITunesUResponse.fromXml(resp.toXml());
+        String xml2 = resp.toXml();
+        assertEquals(xml1, xml2);
+        this.responseValidator.validate(buildSource(resp.toXml()));
+    }
 
     private static Course sampleCourse() {
         Course course = new Course();
-        course.setName("");
-        // course.setHandle(""); - NOT AVAILABLE IN XSD
-        course.setShortName("");
-        course.setIdentifier("");
-        course.setInstructor("");
-        course.setDescription("");
+        course.setName("course name");
+        // course.setHandle("123456"); - NOT AVAILABLE IN XSD
+        course.setShortName("short name");
+        course.setIdentifier("identifier");
+        course.setInstructor("instructor");
+        course.setDescription("description");
         course.getGroups().add(sampleGroup());
         course.setAllowSubscription(true);
-        course.setThemeHandle("");
+        course.setThemeHandle("456543");
         return course;
     }
 
     private static Division sampleDivision() {
         Division division = new Division();
-        division.setName("");
-        division.setShortName("");
-        division.setIdentifier("");
+        division.setName("division name");
+        division.setShortName("short name");
+        division.setIdentifier("identifier");
         division.setAllowSubscription(false);
-        division.getPermissions().add(new Permission("", ""));
+        division.getPermissions().add(new Permission("credential", "access"));
         division.getSections().add(sampleSection());
-        division.setThemeHandle("");
+        division.setThemeHandle("234567");
         return division;
     }
 
     private static Group sampleGroup() {
         Group group = new Group();
-        group.setName("");
-        group.setHandle("");
+        group.setName("group name");
+        group.setHandle("345678");
         group.getTracks().add(sampleTrack());
-        group.getPermissions().add(new Permission("", ""));
+        group.getPermissions().add(new Permission("credential", "access"));
         return group;
     }
 
     private static Section sampleSection() {
         Section section = new Section();
-        section.setName("");
-        section.setHandle("");
+        section.setName("section name");
+        section.setHandle("543210");
         section.getSectionItems().add(sampleCourse());
         return section;
     }
 
     private static Site sampleSite() {
         Site site = new Site();
-        site.setName("");
-        site.setHandle("");
+        site.setName("site name");
+        site.setHandle("654321");
         site.setAllowSubscription(true);
-        site.getPermissions().add(new Permission("", ""));
+        site.getPermissions().add(new Permission("credential", "access"));
         site.getSections().add(sampleSection());
         site.setTemplates(sampleTemplates());
-        site.setThemeHandle("");
+        site.setThemeHandle("765432");
         return site;
     }
 
     private static Templates sampleTemplates() {
         Templates templates = new Templates();
-        templates.setName("");
-        templates.setHandle("");
+        templates.setName("templates name");
+        templates.setHandle("876543");
         templates.getSectionItems().add(sampleCourse());
         return templates;
     }
 
     private static Track sampleTrack() {
         Track track = new Track();
-        track.setName("");
-        track.setHandle("");
-        track.setKind("");
+        track.setName("track name");
+        track.setHandle("987654");
+        track.setKind("kind");
         track.setDiscNumber(1);
         track.setDurationMilliseconds(0L);
-        track.setAlbumName("");
-        track.setArtistName("");
-        track.setDownloadUrl("");
+        track.setAlbumName("album");
+        track.setArtistName("artist");
+        track.setDownloadUrl("http://download.url");
         return track;
     }
 }
