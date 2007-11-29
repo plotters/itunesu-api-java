@@ -190,7 +190,7 @@ public class XsdTest extends TestCase {
         course.setInstructor("");
         course.setDescription("");
         course.getGroups().add(sampleGroup());
-        // course.setAllowSubscription(true); - NOT IMPLEMENTED
+        course.setAllowSubscription(true);
         // course.setThemeHandle(""); - NOT IMPLEMENTED
         return course;
     }
