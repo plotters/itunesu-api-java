@@ -89,7 +89,7 @@ public class Division implements SectionItem {
     public String getShortName() {
         return this.shortName;
     }
-    
+
     public String getIdentifier() {
         return this.identifier;
     }
@@ -125,7 +125,7 @@ public class Division implements SectionItem {
     public void setAllowSubscription(Boolean allowSubscription) {
         this.allowSubscription = allowSubscription;
     }
-    
+
     public void setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
     }
