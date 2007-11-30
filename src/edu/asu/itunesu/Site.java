@@ -29,21 +29,12 @@ package edu.asu.itunesu;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,7 +47,7 @@ import org.xml.sax.SAXException;
 /**
  * An entire iTunesU site, composed of many {@link Section} objects.
  */
-public class Site implements ITunesUElement {
+public class Site extends ITunesUElement {
     private String name;
     private String handle;
     private Boolean allowSubscription;
@@ -176,29 +167,6 @@ public class Site implements ITunesUElement {
             element.appendChild(themeHandleElement);
         }
         return element;
-    }
-
-    public String toXml()
-        throws ParserConfigurationException,
-               TransformerException {
-        DocumentBuilderFactory docFactory =
-            DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
-
-        doc.appendChild(this.toXmlElement(doc));
-
-        TransformerFactory transFactory = TransformerFactory.newInstance();
-        Transformer trans = transFactory.newTransformer();
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-        DOMSource source = new DOMSource(doc);
-        trans.transform(source, result);
-
-        return writer.toString();
     }
 
     public static Site fromXmlElement(Element element) throws ITunesUException {

@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of default values for an iTunesU site.
  */
-public class Templates implements ITunesUElement {
+public class Templates extends ITunesUElement {
     private String name;
     private String handle;
     private List<Permission> permissions;
