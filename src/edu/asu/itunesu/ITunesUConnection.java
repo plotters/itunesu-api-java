@@ -800,26 +800,28 @@ public class ITunesUConnection {
      * @param handle Handle for the destination.
      * @param content A File object containing the content to upload.
      */
-    public void uploadContent(String handle,
-                              File content) throws ITunesUException {
+    public String uploadContent(String handle,
+                                File content) throws ITunesUException {
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         String uploadUrl = this.getUploadUrl(handle, false);
 
-        String result;
+        String response;
 
         try {
-            result = iTunesUFilePOST.invokeAction(uploadUrl,
-                                                  "file",
-                                                  content,
-                                                  "application/octet-stream");
+            response = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                    "file",
+                                                    content,
+                                                    "application/octet-stream");
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         } catch (FileNotFoundException e) {
             throw new ITunesUException(e);
         }
 
-        if ("!".equals(result)) {
+        if ("!".equals(response)) {
             throw new ITunesUException("Error uploading content");
+        } else {
+            return response;
         }
     }
 
@@ -831,28 +833,30 @@ public class ITunesUConnection {
      * @param content Stream of the file content.
      * @param contentLength Length of the file, in bytes.
      */
-    public void uploadContent(String handle,
-                              String fileName,
-                              InputStream content,
-                              int contentLength) throws ITunesUException {
+    public String uploadContent(String handle,
+                                String fileName,
+                                InputStream content,
+                                int contentLength) throws ITunesUException {
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         String uploadUrl = this.getUploadUrl(handle, false);
 
-        String result;
+        String response;
 
         try {
-            result = iTunesUFilePOST.invokeAction(uploadUrl,
-                                                  "file",
-                                                  fileName,
-                                                  content,
-                                                  contentLength,
-                                                  "application/octet-stream");
+            response = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                    "file",
+                                                    fileName,
+                                                    content,
+                                                    contentLength,
+                                                    "application/octet-stream");
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
 
-        if ("!".equals(result)) {
+        if ("!".equals(response)) {
             throw new ITunesUException("Error uploading content");
+        } else {
+            return response;
         }
     }
 
