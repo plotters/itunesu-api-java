@@ -153,7 +153,7 @@ public class ITunesUDocument {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
         arguments.put("ParentPath", "");
-        arguments.put("TemplateHandle", "");
+        arguments.put("TemplateHandle", ""); // TODO
         arguments.put("Division", division);
         ITunesUDocument doc = new ITunesUDocument("AddDivision", arguments);
         return doc;
