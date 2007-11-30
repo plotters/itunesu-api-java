@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of {@link Group} objects.
  */
-public class Course implements SectionItem {
+public class Course extends ITunesUElement implements SectionItem {
     private String name;
     private String handle;
     private String shortName;

@@ -110,7 +110,10 @@ public class ITunesUDocument {
         return doc;
     }
 
-    public String toXml() throws ParserConfigurationException, TransformerException {
+    public String toXml()
+        throws ParserConfigurationException,
+               TransformerException {
+
         Document doc = this.toXmlDocument();
 
         TransformerFactory transFactory = TransformerFactory.newInstance();

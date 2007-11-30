@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of {@link Track} objects, viewable as a tab.
  */
-public class Group implements ITunesUElement {
+public class Group extends ITunesUElement {
     private String name;
     private String handle;
     private List<Track> tracks;

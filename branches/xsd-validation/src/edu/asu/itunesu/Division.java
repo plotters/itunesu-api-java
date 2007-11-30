@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of {@link Section} objects.
  */
-public class Division implements SectionItem {
+public class Division extends ITunesUElement implements SectionItem {
     private String name;
     private String handle;
     private String shortName;

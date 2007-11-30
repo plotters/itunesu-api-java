@@ -152,7 +152,7 @@ public class ITunesUConnection {
      * @return A {@link Site} model object.
      */
     public Site getSiteMinimal() throws ITunesUException {
-        return Site.fromXml(this.showTree(null, "minimal"));
+        return ITunesUResponse.fromXml(this.showTree(null, "minimal")).getSite();
     }
 
     /**

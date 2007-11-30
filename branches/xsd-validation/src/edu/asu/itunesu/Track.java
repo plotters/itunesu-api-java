@@ -35,7 +35,7 @@ import org.w3c.dom.NodeList;
 /**
  * A multimedia document.
  */
-public class Track implements ITunesUElement {
+public class Track extends ITunesUElement {
     private String name;
     private String handle;
     private String kind;
