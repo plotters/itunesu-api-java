@@ -66,9 +66,17 @@ public class XsdTest extends TestCase {
 
     public void testAddDivision() throws Exception {
         Division division = sampleDivision();
-        ITunesUDocument doc = ITunesUDocument.buildAddDivision("123456", division);
+        ITunesUDocument doc = ITunesUDocument.buildAddDivision("123456", "234567", division);
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
+
+    /* NOT AVAILABLE IN XSD
+    public void testAddDivisionNoTemplateHandle() throws Exception {
+        Division division = sampleDivision();
+        ITunesUDocument doc = ITunesUDocument.buildAddDivision("123456", null, division);
+        this.requestValidator.validate(buildSource(doc.toXml()));
+    }
+    */
 
     public void testDeleteDivision() throws Exception {
         ITunesUDocument doc = ITunesUDocument.buildDeleteDivision("123456");

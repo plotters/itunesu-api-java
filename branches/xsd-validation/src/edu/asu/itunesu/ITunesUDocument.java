@@ -149,11 +149,13 @@ public class ITunesUDocument {
         return doc;
     }
 
-    public static ITunesUDocument buildAddDivision(String parentHandle, Division division) {
+    public static ITunesUDocument buildAddDivision(String parentHandle, String templateHandle, Division division) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
         arguments.put("ParentPath", "");
-        arguments.put("TemplateHandle", ""); // TODO
+        if (templateHandle != null) {
+            arguments.put("TemplateHandle", templateHandle);
+        }
         arguments.put("Division", division);
         ITunesUDocument doc = new ITunesUDocument("AddDivision", arguments);
         return doc;
