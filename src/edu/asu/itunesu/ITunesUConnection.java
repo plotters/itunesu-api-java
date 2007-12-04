@@ -262,13 +262,15 @@ public class ITunesUConnection {
      * Adds a division to a section.
      *
      * @param parentHandle Handle for the parent section.
+     * @param templateHandle Handle for the division template, or null if none.
      * @param division Object containing division information.
      */
     public ITunesUResponse addDivision(String parentHandle,
+                                       String templateHandle,            
                                        Division division)
         throws ITunesUException {
 
-        ITunesUDocument doc = ITunesUDocument.buildAddDivision(parentHandle, division);
+        ITunesUDocument doc = ITunesUDocument.buildAddDivision(parentHandle, templateHandle, division);
         return this.send(null, doc);
     }
 
