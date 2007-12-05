@@ -29,13 +29,29 @@ package edu.asu.itunesu;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
 import java.util.Date;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * The iTunesU Web Services API connection.
@@ -160,12 +176,11 @@ public class ITunesUConnection {
      * @return A {@link Section} model object.
      */
     public Section getSection(String handle) throws ITunesUException {
-        Section section = Site.fromXml(this.showTree(handle)).getSections().get(0);
-        if (section.getHandle() == null) {
-            return ((Division) section.getSectionItems().get(0)).getSections().get(0);
-        } else {
-            return section;
-        }
+        String xml = this.showTree(handle);
+        String pattern = "//Section[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) return null;
+        return Section.fromXmlElement(element);
     }
 
     /**
@@ -175,7 +190,11 @@ public class ITunesUConnection {
      * @return A {@link Division} model object.
      */
     public Division getDivision(String handle) throws ITunesUException {
-        return (Division) Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
+        String xml = this.showTree(handle);
+        String pattern = "//Division[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) return null;
+        return Division.fromXmlElement(element);
     }
 
     /**
@@ -185,12 +204,11 @@ public class ITunesUConnection {
      * @return A {@link Course} model object.
      */
     public Course getCourse(String handle) throws ITunesUException {
-        SectionItem sectionItem = Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
-        if (sectionItem instanceof Course) {
-            return (Course) sectionItem;
-        } else {
-            return (Course) ((Division) sectionItem).getSections().get(0).getSectionItems().get(0);
-        }
+        String xml = this.showTree(handle);
+        String pattern = "//Course[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) return null;
+        return Course.fromXmlElement(element);
     }
 
     /**
@@ -200,12 +218,11 @@ public class ITunesUConnection {
      * @return A {@link Group} model object.
      */
     public Group getGroup(String handle) throws ITunesUException {
-        SectionItem sectionItem = Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
-        if (sectionItem instanceof Course) {
-            return ((Course) sectionItem).getGroups().get(0);
-        } else {
-            return ((Course) ((Division) sectionItem).getSections().get(0).getSectionItems().get(0)).getGroups().get(0);
-        }
+        String xml = this.showTree(handle);
+        String pattern = "//Group[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) return null;
+        return Group.fromXmlElement(element);
     }
 
     /**
@@ -942,5 +959,40 @@ public class ITunesUConnection {
 
     private String getSiteDomain() {
         return this.siteUrl.substring(this.siteUrl.lastIndexOf('/') + 1);
+    }
+
+    private static Element getElementByXPath(String xml, String pattern)
+        throws ITunesUException {
+        DocumentBuilderFactory docFactory =
+            DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder;
+        try {
+            docBuilder = docFactory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new ITunesUException(e);
+        }
+        Document doc;
+        try {
+            doc = docBuilder.parse(new InputSource(new StringReader(xml)));
+        } catch (SAXException e) {
+            throw new ITunesUException(e);
+        } catch (IOException e) {
+            throw new ITunesUException(e);
+        }
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        XPathExpression expr;
+        try {
+            expr = xpath.compile(pattern);
+        } catch (XPathExpressionException e) {
+            throw new ITunesUException(e);
+        }
+        NodeList result;
+        try {
+            result = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        } catch (XPathExpressionException e) {
+            throw new ITunesUException(e);
+        }
+        return (Element) result.item(0);
     }
 }
