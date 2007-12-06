@@ -34,7 +34,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -179,7 +181,9 @@ public class ITunesUConnection {
         String xml = this.showTree(handle);
         String pattern = "//Section[Handle=" + handle + "]";
         Element element = getElementByXPath(xml, pattern);
-        if (element == null) return null;
+        if (element == null) {
+            throw new ITunesUException("not a Section handle");
+        }
         return Section.fromXmlElement(element);
     }
 
@@ -193,7 +197,9 @@ public class ITunesUConnection {
         String xml = this.showTree(handle);
         String pattern = "//Division[Handle=" + handle + "]";
         Element element = getElementByXPath(xml, pattern);
-        if (element == null) return null;
+        if (element == null) {
+            throw new ITunesUException("not a Division handle");
+        }
         return Division.fromXmlElement(element);
     }
 
@@ -207,7 +213,9 @@ public class ITunesUConnection {
         String xml = this.showTree(handle);
         String pattern = "//Course[Handle=" + handle + "]";
         Element element = getElementByXPath(xml, pattern);
-        if (element == null) return null;
+        if (element == null) {
+            throw new ITunesUException("not a Course handle");
+        }
         return Course.fromXmlElement(element);
     }
 
@@ -221,8 +229,95 @@ public class ITunesUConnection {
         String xml = this.showTree(handle);
         String pattern = "//Group[Handle=" + handle + "]";
         Element element = getElementByXPath(xml, pattern);
-        if (element == null) return null;
+        if (element == null) {
+            throw new ITunesUException("not a Group handle");
+        }
         return Group.fromXmlElement(element);
+    }
+
+    /**
+     * Retrieves all sections beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Section} model objects.
+     */
+    public List<Section> getSections(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Section[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Section> result = new ArrayList<Section>();
+        for (Element element : elements) {
+            result.add(Section.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all divisions beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Division} model objects.
+     */
+    public List<Division> getDivisions(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Division[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Division> result = new ArrayList<Division>();
+        for (Element element : elements) {
+            result.add(Division.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all courses beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Course} model objects.
+     */
+    public List<Course> getCourses(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Course[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Course> result = new ArrayList<Course>();
+        for (Element element : elements) {
+            result.add(Course.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all groups beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Group} model objects.
+     */
+    public List<Group> getGroups(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Group[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Group> result = new ArrayList<Group>();
+        for (Element element : elements) {
+            result.add(Group.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all tracks beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Track} model objects.
+     */
+    public List<Track> getTracks(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Track[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Track> result = new ArrayList<Track>();
+        for (Element element : elements) {
+            result.add(Track.fromXmlElement(element));
+        }
+        return result;
     }
 
     /**
@@ -961,7 +1056,7 @@ public class ITunesUConnection {
         return this.siteUrl.substring(this.siteUrl.lastIndexOf('/') + 1);
     }
 
-    private static Element getElementByXPath(String xml, String pattern)
+    private static List<Element> getElementsByXPath(String xml, String pattern)
         throws ITunesUException {
         DocumentBuilderFactory docFactory =
             DocumentBuilderFactory.newInstance();
@@ -987,12 +1082,26 @@ public class ITunesUConnection {
         } catch (XPathExpressionException e) {
             throw new ITunesUException(e);
         }
-        NodeList result;
+        NodeList nodeList;
         try {
-            result = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+            nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
             throw new ITunesUException(e);
         }
-        return (Element) result.item(0);
+        List<Element> result = new ArrayList<Element>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            result.add((Element) nodeList.item(i));
+        }
+        return result;
+    }
+    
+    private static Element getElementByXPath(String xml, String pattern)
+        throws ITunesUException {
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        if (elements.size() > 0) {
+            return elements.get(0);
+        } else {
+            return null;
+        }
     }
 }
