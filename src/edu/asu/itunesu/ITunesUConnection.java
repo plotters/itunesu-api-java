@@ -236,6 +236,22 @@ public class ITunesUConnection {
     }
 
     /**
+     * Retrieves a track by its handle.
+     *
+     * @param handle The handle of the track.
+     * @return A {@link Track} model object.
+     */
+    public Track getTrack(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Track[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) {
+            throw new ITunesUException("not a Track handle");
+        }
+        return Track.fromXmlElement(element);
+    }
+
+    /**
      * Retrieves all sections beneath a node in the site tree.
      * 
      * @param handle The handle of a node in the tree, or null for the site.
