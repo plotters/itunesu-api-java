@@ -45,6 +45,9 @@ public class XsdTest extends TestCase {
     public void setUp() throws Exception {
         this.requestValidator = buildValidator(REQUEST_XSD_PATH);
         this.responseValidator = buildValidator(RESPONSE_XSD_PATH);
+        
+        // Disable track-name-as-title workaround.
+        System.setProperty("edu.asu.itunesu.sendTrackNameAsTitle", "false");
     }
 
     public void testShowTree() throws Exception {
