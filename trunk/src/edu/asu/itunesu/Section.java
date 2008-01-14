@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of {@link SectionItem} objects.
  */
-public class Section implements ITunesUElement {
+public class Section extends ITunesUElement {
     private String name;
     private String handle;
     private List<Permission> permissions;
@@ -173,7 +173,7 @@ public class Section implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="

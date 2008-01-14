@@ -29,21 +29,12 @@ package edu.asu.itunesu;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,13 +47,14 @@ import org.xml.sax.SAXException;
 /**
  * An entire iTunesU site, composed of many {@link Section} objects.
  */
-public class Site implements ITunesUElement {
+public class Site extends ITunesUElement {
     private String name;
     private String handle;
     private Boolean allowSubscription;
     private List<Permission> permissions;
     private List<Section> sections;
     private Templates templates;
+    private String themeHandle;
 
     public Site() {
         this.permissions = new ArrayList<Permission>();
@@ -74,13 +66,15 @@ public class Site implements ITunesUElement {
                 Boolean allowSubscription,
                 List<Permission> permissions,
                 List<Section> sections,
-                Templates templates) {
+                Templates templates,
+                String themeHandle) {
         this.name = name;
         this.handle = handle;
         this.allowSubscription = allowSubscription;
         this.permissions = permissions;
         this.sections = sections;
         this.templates = templates;
+        this.themeHandle = themeHandle;
     }
 
     public String getName() {
@@ -107,6 +101,10 @@ public class Site implements ITunesUElement {
         return this.templates;
     }
 
+    public String getThemeHandle() {
+        return this.themeHandle;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -131,6 +129,10 @@ public class Site implements ITunesUElement {
         this.templates = templates;
     }
 
+    public void setThemeHandle(String themeHandle) {
+        this.themeHandle = themeHandle;
+    }
+
     public Element toXmlElement(Document doc) {
         Element element = doc.createElement("Site");
         if (this.name != null) {
@@ -144,11 +146,11 @@ public class Site implements ITunesUElement {
             element.appendChild(handleElement);
         }
         if (this.allowSubscription != null) {
-        	Element allowSubscriptionElement =
-        		doc.createElement("AllowSubscription");
-        	allowSubscriptionElement.setTextContent(this.allowSubscription
-                                                	? "true" : "false");
-        	element.appendChild(allowSubscriptionElement);
+            Element allowSubscriptionElement =
+                doc.createElement("AllowSubscription");
+            allowSubscriptionElement.setTextContent(this.allowSubscription
+                                                    ? "true" : "false");
+            element.appendChild(allowSubscriptionElement);
         }
         for (Permission permission : this.permissions) {
             element.appendChild(permission.toXmlElement(doc));
@@ -159,32 +161,14 @@ public class Site implements ITunesUElement {
         if (this.templates != null) {
             element.appendChild(this.templates.toXmlElement(doc));
         }
+        if (this.themeHandle != null) {
+            Element themeHandleElement = doc.createElement("ThemeHandle");
+            themeHandleElement.setTextContent(this.themeHandle);
+            element.appendChild(themeHandleElement);
+        }
         return element;
     }
 
-    public String toXml()
-        throws ParserConfigurationException,
-               TransformerException {
-        DocumentBuilderFactory docFactory =
-            DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
-        
-        doc.appendChild(this.toXmlElement(doc));
-        
-        TransformerFactory transFactory = TransformerFactory.newInstance();
-        Transformer trans = transFactory.newTransformer();
-        trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-        DOMSource source = new DOMSource(doc);
-        trans.transform(source, result);
-        
-        return writer.toString();
-    }
-    
     public static Site fromXmlElement(Element element) throws ITunesUException {
         if (!"Site".equals(element.getNodeName())) {
             throw new ITunesUException("Expected Site, got "
@@ -192,10 +176,11 @@ public class Site implements ITunesUElement {
         }
         String name = null;
         String handle = null;
-        Boolean allowSubscription = false;
+        Boolean allowSubscription = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
         Templates templates = null;
+        String themeHandle = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -212,6 +197,8 @@ public class Site implements ITunesUElement {
                     sections.add(Section.fromXmlElement((Element) childNode));
                 } else if ("Templates".equals(childNode.getNodeName())) {
                     templates = Templates.fromXmlElement((Element) childNode);
+                } else if ("ThemeHandle".equals(childNode.getNodeName())) {
+                    themeHandle = childNode.getTextContent();
                 }
             }
         }
@@ -220,7 +207,8 @@ public class Site implements ITunesUElement {
                         allowSubscription,
                         permissions,
                         sections,
-                        templates);
+                        templates,
+                        themeHandle);
     }
 
     public static Site fromXml(String xml)
@@ -245,7 +233,7 @@ public class Site implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="

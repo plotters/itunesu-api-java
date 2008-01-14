@@ -35,7 +35,7 @@ import org.w3c.dom.NodeList;
 /**
  * A multimedia document.
  */
-public class Track implements ITunesUElement {
+public class Track extends ITunesUElement {
     private String name;
     private String handle;
     private String kind;
@@ -170,9 +170,11 @@ public class Track implements ITunesUElement {
             element.appendChild(nameElement);
             // Workaround for Apple bug - see:
             // http://discussions.apple.com/thread.jspa?threadID=1228047&tstart=0
-            Element titleElement = doc.createElement("Title");
-            titleElement.setTextContent(this.name);
-            element.appendChild(titleElement);
+            if ("true".equals(System.getProperty("edu.asu.itunesu.sendTrackNameAsTitle", "true"))) {
+                Element titleElement = doc.createElement("Title");
+                titleElement.setTextContent(this.name);
+                element.appendChild(titleElement);
+            }
         }
         if (this.handle != null) {
             Element handleElement = doc.createElement("Handle");
@@ -185,19 +187,19 @@ public class Track implements ITunesUElement {
             element.appendChild(kindElement);
         }
         if (this.trackNumber != null) {
-        	Element trackNumberElement = doc.createElement("TrackNumber");
-        	trackNumberElement.setTextContent(Integer.toString(this.trackNumber));
-        	element.appendChild(trackNumberElement);
+            Element trackNumberElement = doc.createElement("TrackNumber");
+            trackNumberElement.setTextContent(Integer.toString(this.trackNumber));
+            element.appendChild(trackNumberElement);
         }
         if (this.discNumber != null) {
-        	Element discNumberElement = doc.createElement("DiscNumber");
-        	discNumberElement.setTextContent(Integer.toString(this.discNumber));
-        	element.appendChild(discNumberElement);
+            Element discNumberElement = doc.createElement("DiscNumber");
+            discNumberElement.setTextContent(Integer.toString(this.discNumber));
+            element.appendChild(discNumberElement);
         }
         if (this.durationMilliseconds != null) {
-        	Element durationMillisecondsElement = doc.createElement("DurationMilliseconds");
-        	durationMillisecondsElement.setTextContent(Long.toString(this.durationMilliseconds));
-        	element.appendChild(durationMillisecondsElement);
+            Element durationMillisecondsElement = doc.createElement("DurationMilliseconds");
+            durationMillisecondsElement.setTextContent(Long.toString(this.durationMilliseconds));
+            element.appendChild(durationMillisecondsElement);
         }
         if (this.albumName != null) {
             Element albumNameElement = doc.createElement("AlbumName");
@@ -235,9 +237,9 @@ public class Track implements ITunesUElement {
         String name = null;
         String handle = null;
         String kind = null;
-        Integer trackNumber = 0;
-        Integer discNumber = 1;
-        Long durationMilliseconds = 0L;
+        Integer trackNumber = null;
+        Integer discNumber = null;
+        Long durationMilliseconds = null;
         String albumName = null;
         String artistName = null;
         String genreName = null;
@@ -286,7 +288,7 @@ public class Track implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="
