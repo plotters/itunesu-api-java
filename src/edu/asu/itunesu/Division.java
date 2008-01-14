@@ -48,13 +48,15 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of {@link Section} objects.
  */
-public class Division implements SectionItem {
+public class Division extends ITunesUElement implements SectionItem {
     private String name;
     private String handle;
-    private String identifier;
     private String shortName;
+    private String identifier;
+    private Boolean allowSubscription;
     private List<Permission> permissions;
     private List<Section> sections;
+    private String themeHandle;
 
     public Division() {
         this.permissions = new ArrayList<Permission>();
@@ -63,16 +65,20 @@ public class Division implements SectionItem {
 
     public Division(String name,
                     String handle,
-                    String identifier,
                     String shortName,
+                    String identifier,
+                    Boolean allowSubscription,
                     List<Permission> permissions,
-                    List<Section> sections) {
+                    List<Section> sections,
+                    String themeHandle) {
         this.name = name;
         this.handle = handle;
-        this.identifier = identifier;
         this.shortName = shortName;
+        this.identifier = identifier;
+        this.allowSubscription = allowSubscription;
         this.permissions = permissions;
         this.sections = sections;
+        this.themeHandle = themeHandle;
     }
 
     public String getName() {
@@ -83,12 +89,16 @@ public class Division implements SectionItem {
         return this.handle;
     }
 
+    public String getShortName() {
+        return this.shortName;
+    }
+
     public String getIdentifier() {
         return this.identifier;
     }
 
-    public String getShortName() {
-        return this.shortName;
+    public Boolean getAllowSubscription() {
+        return this.allowSubscription;
     }
 
     public List<Permission> getPermissions() {
@@ -99,6 +109,10 @@ public class Division implements SectionItem {
         return this.sections;
     }
 
+    public String getThemeHandle() {
+        return this.themeHandle;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -107,12 +121,16 @@ public class Division implements SectionItem {
         this.handle = handle;
     }
 
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
-    public void setShortName(String shortName) {
-        this.shortName = shortName;
+    public void setAllowSubscription(Boolean allowSubscription) {
+        this.allowSubscription = allowSubscription;
     }
 
     public void setPermissions(List<Permission> permissions) {
@@ -121,6 +139,10 @@ public class Division implements SectionItem {
 
     public void setSections(List<Section> sections) {
         this.sections = sections;
+    }
+
+    public void setThemeHandle(String themeHandle) {
+        this.themeHandle = themeHandle;
     }
 
     public Element toXmlElement(Document doc) {
@@ -135,21 +157,33 @@ public class Division implements SectionItem {
             handleElement.setTextContent(this.handle);
             element.appendChild(handleElement);
         }
+        if (this.shortName != null) {
+            Element shortNameElement = doc.createElement("ShortName");
+            shortNameElement.setTextContent(this.shortName);
+            element.appendChild(shortNameElement);
+        }
         if (this.identifier != null) {
             Element identifierElement = doc.createElement("Identifier");
             identifierElement.setTextContent(this.identifier);
             element.appendChild(identifierElement);
         }
-        if (this.shortName != null) {
-            Element shortNameElement = doc.createElement("ShortName");
-            shortNameElement.setTextContent(this.shortName);
-            element.appendChild(shortNameElement);
+        if (this.allowSubscription != null) {
+            Element allowSubscriptionElement =
+                doc.createElement("AllowSubscription");
+            allowSubscriptionElement.setTextContent(this.allowSubscription
+                                                    ? "true" : "false");
+            element.appendChild(allowSubscriptionElement);
         }
         for (Permission permission : this.permissions) {
             element.appendChild(permission.toXmlElement(doc));
         }
         for (Section section : this.sections) {
             element.appendChild(section.toXmlElement(doc));
+        }
+        if (this.themeHandle != null) {
+            Element themeHandleElement = doc.createElement("ThemeHandle");
+            themeHandleElement.setTextContent(this.themeHandle);
+            element.appendChild(themeHandleElement);
         }
         return element;
     }
@@ -161,10 +195,12 @@ public class Division implements SectionItem {
         }
         String name = null;
         String handle = null;
-        String identifier = null;
         String shortName = null;
+        String identifier = null;
+        Boolean allowSubscription = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Section> sections = new ArrayList<Section>();
+        String themeHandle = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -173,23 +209,29 @@ public class Division implements SectionItem {
                     name = childNode.getTextContent();
                 } else if ("Handle".equals(childNode.getNodeName())) {
                     handle = childNode.getTextContent();
-                } else if ("Identifier".equals(childNode.getNodeName())) {
-                    identifier = childNode.getTextContent();
                 } else if ("ShortName".equals(childNode.getNodeName())) {
                     shortName = childNode.getTextContent();
+                } else if ("Identifier".equals(childNode.getNodeName())) {
+                    identifier = childNode.getTextContent();
+                } else if ("AllowSubscription".equals(childNode.getNodeName())) {
+                    allowSubscription = "true".equals(childNode.getTextContent());
                 } else if ("Permission".equals(childNode.getNodeName())) {
                     permissions.add(Permission.fromXmlElement((Element) childNode));
                 } else if ("Section".equals(childNode.getNodeName())) {
                     sections.add(Section.fromXmlElement((Element) childNode));
+                } else if ("ThemeHandle".equals(childNode.getNodeName())) {
+                    themeHandle = childNode.getTextContent();
                 }
             }
         }
         return new Division(name,
                             handle,
-                            identifier,
                             shortName,
+                            identifier,
+                            allowSubscription,
                             permissions,
-                            sections);
+                            sections,
+                            themeHandle);
     }
 
     public static Division fromXml(String xml)
@@ -214,7 +256,7 @@ public class Division implements SectionItem {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="

@@ -35,7 +35,7 @@ import org.w3c.dom.NodeList;
 /**
  * A permission record containing credential and access settings.
  */
-public class Permission implements ITunesUElement {
+public class Permission extends ITunesUElement {
     public static final String ACCESS_NO_ACCESS = "No Access";
     public static final String ACCESS_DOWNLOAD  = "Download";
     public static final String ACCESS_DROP_BOX  = "Drop Box";
@@ -105,7 +105,7 @@ public class Permission implements ITunesUElement {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[credential="
                 + (this.getCredential() == null ? "<null>" : this.getCredential())
                 + ",access="

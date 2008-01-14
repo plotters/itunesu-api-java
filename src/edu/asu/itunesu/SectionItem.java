@@ -29,10 +29,13 @@ package edu.asu.itunesu;
 
 import java.util.List;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 /**
  * A {@link Division} or {@link Group} contained within a {@link Section}.
  */
-public interface SectionItem extends ITunesUElement {
+public interface SectionItem {
     public String getName();
     public String getHandle();
     public String getIdentifier();
@@ -43,4 +46,5 @@ public interface SectionItem extends ITunesUElement {
     public void setIdentifier(String identifier);
     public void setShortName(String shortName);
     public void setPermissions(List<Permission> permissions);
+    public Element toXmlElement(Document doc);
 }

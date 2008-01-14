@@ -29,17 +29,31 @@ package edu.asu.itunesu;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * The iTunesU Web Services API connection.
@@ -154,7 +168,7 @@ public class ITunesUConnection {
      * @return A {@link Site} model object.
      */
     public Site getSiteMinimal() throws ITunesUException {
-        return Site.fromXml(this.showTree(null, "minimal"));
+        return ITunesUResponse.fromXml(this.showTree(null, "minimal")).getSite();
     }
 
     /**
@@ -164,12 +178,13 @@ public class ITunesUConnection {
      * @return A {@link Section} model object.
      */
     public Section getSection(String handle) throws ITunesUException {
-        Section section = Site.fromXml(this.showTree(handle)).getSections().get(0);
-        if (section.getHandle() == null) {
-            return ((Division) section.getSectionItems().get(0)).getSections().get(0);
-        } else {
-            return section;
+        String xml = this.showTree(handle);
+        String pattern = "//Section[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) {
+            throw new ITunesUException("not a Section handle");
         }
+        return Section.fromXmlElement(element);
     }
 
     /**
@@ -179,7 +194,13 @@ public class ITunesUConnection {
      * @return A {@link Division} model object.
      */
     public Division getDivision(String handle) throws ITunesUException {
-        return (Division) Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
+        String xml = this.showTree(handle);
+        String pattern = "//Division[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) {
+            throw new ITunesUException("not a Division handle");
+        }
+        return Division.fromXmlElement(element);
     }
 
     /**
@@ -189,12 +210,13 @@ public class ITunesUConnection {
      * @return A {@link Course} model object.
      */
     public Course getCourse(String handle) throws ITunesUException {
-        SectionItem sectionItem = Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
-        if (sectionItem instanceof Course) {
-            return (Course) sectionItem;
-        } else {
-            return (Course) ((Division) sectionItem).getSections().get(0).getSectionItems().get(0);
+        String xml = this.showTree(handle);
+        String pattern = "//Course[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) {
+            throw new ITunesUException("not a Course handle");
         }
+        return Course.fromXmlElement(element);
     }
 
     /**
@@ -204,12 +226,114 @@ public class ITunesUConnection {
      * @return A {@link Group} model object.
      */
     public Group getGroup(String handle) throws ITunesUException {
-        SectionItem sectionItem = Site.fromXml(this.showTree(handle)).getSections().get(0).getSectionItems().get(0);
-        if (sectionItem instanceof Course) {
-            return ((Course) sectionItem).getGroups().get(0);
-        } else {
-            return ((Course) ((Division) sectionItem).getSections().get(0).getSectionItems().get(0)).getGroups().get(0);
+        String xml = this.showTree(handle);
+        String pattern = "//Group[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) {
+            throw new ITunesUException("not a Group handle");
         }
+        return Group.fromXmlElement(element);
+    }
+
+    /**
+     * Retrieves a track by its handle.
+     *
+     * @param handle The handle of the track.
+     * @return A {@link Track} model object.
+     */
+    public Track getTrack(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Track[Handle=" + handle + "]";
+        Element element = getElementByXPath(xml, pattern);
+        if (element == null) {
+            throw new ITunesUException("not a Track handle");
+        }
+        return Track.fromXmlElement(element);
+    }
+
+    /**
+     * Retrieves all sections beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Section} model objects.
+     */
+    public List<Section> getSections(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Section[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Section> result = new ArrayList<Section>();
+        for (Element element : elements) {
+            result.add(Section.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all divisions beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Division} model objects.
+     */
+    public List<Division> getDivisions(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Division[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Division> result = new ArrayList<Division>();
+        for (Element element : elements) {
+            result.add(Division.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all courses beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Course} model objects.
+     */
+    public List<Course> getCourses(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Course[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Course> result = new ArrayList<Course>();
+        for (Element element : elements) {
+            result.add(Course.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all groups beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Group} model objects.
+     */
+    public List<Group> getGroups(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Group[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Group> result = new ArrayList<Group>();
+        for (Element element : elements) {
+            result.add(Group.fromXmlElement(element));
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves all tracks beneath a node in the site tree.
+     * 
+     * @param handle The handle of a node in the tree, or null for the site.
+     * @return A list of {@link Track} model objects.
+     */
+    public List<Track> getTracks(String handle) throws ITunesUException {
+        String xml = this.showTree(handle);
+        String pattern = "//Track[Handle]";
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        List<Track> result = new ArrayList<Track>();
+        for (Element element : elements) {
+            result.add(Track.fromXmlElement(element));
+        }
+        return result;
     }
 
     /**
@@ -219,10 +343,10 @@ public class ITunesUConnection {
      * @param siteHandle Handle for the site to update.
      * @param site Object containing site information.
      */
-    public void mergeSite(String siteHandle, Site site)
+    public ITunesUResponse mergeSite(String siteHandle, Site site)
         throws ITunesUException {
 
-        this.mergeSite(siteHandle, site, false, false);
+        return this.mergeSite(siteHandle, site, false, false);
     }
 
     /**
@@ -234,12 +358,12 @@ public class ITunesUConnection {
      * @param mergeByHandle If true, merge sections by handle.
      *                      Otherwise, merge by name.
      */
-    public void mergeSite(String siteHandle,
-                          Site site,
-                          boolean mergeByHandle)
+    public ITunesUResponse mergeSite(String siteHandle,
+                                     Site site,
+                                     boolean mergeByHandle)
         throws ITunesUException {
 
-        this.mergeSite(siteHandle, site, mergeByHandle, false);
+        return this.mergeSite(siteHandle, site, mergeByHandle, false);
     }
 
     /**
@@ -252,46 +376,30 @@ public class ITunesUConnection {
      * @param destructive If true, delete any unspecified
      *                    sections or permissions.
      */
-    public void mergeSite(String siteHandle,
-                          Site site,
-                          boolean mergeByHandle,
-                          boolean destructive)
+    public ITunesUResponse mergeSite(String siteHandle,
+                                     Site site,
+                                     boolean mergeByHandle,
+                                     boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (siteHandle != null) {
-            arguments.put("SiteHandle", siteHandle);
-        }
-
-        arguments.put("Site", site);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
-
-        ITunesUDocument doc = new ITunesUDocument("MergeSite", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergeSite(siteHandle, site, mergeByHandle, destructive);
+        return this.send(null, doc);
     }
 
     /**
      * Adds a division to a section.
      *
      * @param parentHandle Handle for the parent section.
+     * @param templateHandle Handle for the division template, or null if none.
      * @param division Object containing division information.
      */
-    public void addDivision(String parentHandle,
-                            Division division)
+    public ITunesUResponse addDivision(String parentHandle,
+                                       String templateHandle,            
+                                       Division division)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
-        arguments.put("Division", division);
-
-        ITunesUDocument doc = new ITunesUDocument("AddDivision", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildAddDivision(parentHandle, templateHandle, division);
+        return this.send(null, doc);
     }
 
     /**
@@ -299,17 +407,11 @@ public class ITunesUConnection {
      *
      * @param divisionHandle Handle for the division to delete.
      */
-    public void deleteDivision(String divisionHandle)
+    public ITunesUResponse deleteDivision(String divisionHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (divisionHandle != null) {
-            arguments.put("DivisionHandle", divisionHandle);
-        }
-
-        ITunesUDocument doc = new ITunesUDocument("DeleteDivision", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildDeleteDivision(divisionHandle);
+        return this.send(null, doc);
     }
 
     /**
@@ -319,10 +421,10 @@ public class ITunesUConnection {
      * @param divisionHandle Handle for the division to update.
      * @param division Object containing division information.
      */
-    public void mergeDivision(String divisionHandle, Division division)
+    public ITunesUResponse mergeDivision(String divisionHandle, Division division)
         throws ITunesUException {
 
-        this.mergeDivision(divisionHandle, division, false, false);
+        return this.mergeDivision(divisionHandle, division, false, false);
     }
 
     /**
@@ -334,12 +436,12 @@ public class ITunesUConnection {
      * @param mergeByHandle If true, merge sections by handle.
      *                      Otherwise, merge by name.
      */
-    public void mergeDivision(String divisionHandle,
-                              Division division,
-                              boolean mergeByHandle)
+    public ITunesUResponse mergeDivision(String divisionHandle,
+                                         Division division,
+                                         boolean mergeByHandle)
         throws ITunesUException {
 
-        this.mergeDivision(divisionHandle, division, mergeByHandle, false);
+        return this.mergeDivision(divisionHandle, division, mergeByHandle, false);
     }
 
     /**
@@ -352,24 +454,14 @@ public class ITunesUConnection {
      * @param destructive If true, delete any unspecified
      *                    sections or permissions.
      */
-    public void mergeDivision(String divisionHandle,
-                              Division division,
-                              boolean mergeByHandle,
-                              boolean destructive)
+    public ITunesUResponse mergeDivision(String divisionHandle,
+                                         Division division,
+                                         boolean mergeByHandle,
+                                         boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (divisionHandle != null) {
-            arguments.put("DivisionHandle", divisionHandle);
-        }
-
-        arguments.put("Division", division);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
-
-        ITunesUDocument doc = new ITunesUDocument("MergeDivision", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergeDivision(divisionHandle, division, mergeByHandle, destructive);
+        return this.send(null, doc);
     }
 
     /**
@@ -378,20 +470,12 @@ public class ITunesUConnection {
      * @param parentHandle Handle for the parent site or division.
      * @param section Object containing section information.
      */
-    public void addSection(String parentHandle,
-                           Section section)
+    public ITunesUResponse addSection(String parentHandle,
+                                      Section section)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
-        arguments.put("Section", section);
-
-        ITunesUDocument doc = new ITunesUDocument("AddSection", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildAddSection(parentHandle, section);
+        return this.send(null, doc);
     }
 
     /**
@@ -399,17 +483,11 @@ public class ITunesUConnection {
      *
      * @param sectionHandle Handle for the section to delete.
      */
-    public void deleteSection(String sectionHandle)
+    public ITunesUResponse deleteSection(String sectionHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (sectionHandle != null) {
-            arguments.put("SectionHandle", sectionHandle);
-        }
-
-        ITunesUDocument doc = new ITunesUDocument("DeleteSection", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildDeleteSection(sectionHandle);
+        return this.send(null, doc);
     }
 
     /**
@@ -419,10 +497,10 @@ public class ITunesUConnection {
      * @param sectionHandle Handle for the section to update.
      * @param section Object containing section information.
      */
-    public void mergeSection(String sectionHandle, Section section)
+    public ITunesUResponse mergeSection(String sectionHandle, Section section)
         throws ITunesUException {
 
-        this.mergeSection(sectionHandle, section, false, false);
+        return this.mergeSection(sectionHandle, section, false, false);
     }
 
     /**
@@ -434,12 +512,12 @@ public class ITunesUConnection {
      * @param mergeByHandle If true, merge items by handle.
      *                      Otherwise, merge by name.
      */
-    public void mergeSection(String sectionHandle,
-                             Section section,
-                             boolean mergeByHandle)
+    public ITunesUResponse mergeSection(String sectionHandle,
+                                        Section section,
+                                        boolean mergeByHandle)
         throws ITunesUException {
 
-        this.mergeSection(sectionHandle, section, mergeByHandle, false);
+        return this.mergeSection(sectionHandle, section, mergeByHandle, false);
     }
 
     /**
@@ -452,24 +530,14 @@ public class ITunesUConnection {
      * @param destructive If true, delete any unspecified
      *                    items or permissions.
      */
-    public void mergeSection(String sectionHandle,
-                             Section section,
-                             boolean mergeByHandle,
-                             boolean destructive)
+    public ITunesUResponse mergeSection(String sectionHandle,
+                                        Section section,
+                                        boolean mergeByHandle,
+                                        boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (sectionHandle != null) {
-            arguments.put("SectionHandle", sectionHandle);
-        }
-
-        arguments.put("Section", section);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
-
-        ITunesUDocument doc = new ITunesUDocument("MergeSection", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergeSection(sectionHandle, section, mergeByHandle, destructive);
+        return this.send(null, doc);
     }
 
     /**
@@ -479,25 +547,13 @@ public class ITunesUConnection {
      * @param templateHandle Handle for the course template, or null if none.
      * @param course Object containing course information.
      */
-    public void addCourse(String parentHandle,
-                          String templateHandle,
-                          Course course)
+    public ITunesUResponse addCourse(String parentHandle,
+                                     String templateHandle,
+                                     Course course)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
-        if (templateHandle != null) {
-            arguments.put("TemplateHandle", templateHandle);
-        }
-
-        arguments.put("Course", course);
-
-        ITunesUDocument doc = new ITunesUDocument("AddCourse", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildAddCourse(parentHandle, templateHandle, course);
+        return this.send(null, doc);
     }
 
     /**
@@ -505,17 +561,11 @@ public class ITunesUConnection {
      *
      * @param courseHandle Handle for the course to delete.
      */
-    public void deleteCourse(String courseHandle)
+    public ITunesUResponse deleteCourse(String courseHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (courseHandle != null) {
-            arguments.put("CourseHandle", courseHandle);
-        }
-
-        ITunesUDocument doc = new ITunesUDocument("DeleteCourse", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildDeleteCourse(courseHandle);
+        return this.send(null, doc);
     }
 
     /**
@@ -525,10 +575,10 @@ public class ITunesUConnection {
      * @param courseHandle Handle for the course to update.
      * @param course Object containing course information.
      */
-    public void mergeCourse(String courseHandle, Course course)
+    public ITunesUResponse mergeCourse(String courseHandle, Course course)
         throws ITunesUException {
 
-        this.mergeCourse(courseHandle, course, false, false);
+        return this.mergeCourse(courseHandle, course, false, false);
     }
 
     /**
@@ -540,12 +590,12 @@ public class ITunesUConnection {
      * @param mergeByHandle If true, merge groups by handle.
      *                      Otherwise, merge by name.
      */
-    public void mergeCourse(String courseHandle,
-                            Course course,
-                            boolean mergeByHandle)
+    public ITunesUResponse mergeCourse(String courseHandle,
+                                       Course course,
+                                       boolean mergeByHandle)
         throws ITunesUException {
 
-        this.mergeCourse(courseHandle, course, mergeByHandle, false);
+        return this.mergeCourse(courseHandle, course, mergeByHandle, false);
     }
 
     /**
@@ -558,24 +608,14 @@ public class ITunesUConnection {
      * @param destructive If true, delete any unspecified
      *                    groups or permissions.
      */
-    public void mergeCourse(String courseHandle,
-                            Course course,
-                            boolean mergeByHandle,
-                            boolean destructive)
+    public ITunesUResponse mergeCourse(String courseHandle,
+                                       Course course,
+                                       boolean mergeByHandle,
+                                       boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (courseHandle != null) {
-            arguments.put("CourseHandle", courseHandle);
-        }
-
-        arguments.put("Course", course);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
-
-        ITunesUDocument doc = new ITunesUDocument("MergeCourse", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergeCourse(courseHandle, course, mergeByHandle, destructive);
+        return this.send(null, doc);
     }
 
     /**
@@ -584,16 +624,11 @@ public class ITunesUConnection {
      * @param parentHandle Handle for the parent course.
      * @param group Object containing group information.
      */
-    public void addGroup(String parentHandle, Group group)
+    public ITunesUResponse addGroup(String parentHandle, Group group)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("ParentHandle", parentHandle);
-        arguments.put("Group", group);
-
-        ITunesUDocument doc = new ITunesUDocument("AddGroup", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildAddGroup(parentHandle, group);
+        return this.send(null, doc);
     }
 
     /**
@@ -601,14 +636,11 @@ public class ITunesUConnection {
      *
      * @param groupHandle Handle for the group to delete.
      */
-    public void deleteGroup(String groupHandle)
+    public ITunesUResponse deleteGroup(String groupHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-        arguments.put("GroupHandle", groupHandle);
-
-        ITunesUDocument doc = new ITunesUDocument("DeleteGroup", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildDeleteGroup(groupHandle);
+        return this.send(null, doc);
     }
 
     /**
@@ -618,10 +650,10 @@ public class ITunesUConnection {
      * @param groupHandle Handle for the group to update.
      * @param group Object containing group information.
      */
-    public void mergeGroup(String groupHandle, Group group)
+    public ITunesUResponse mergeGroup(String groupHandle, Group group)
         throws ITunesUException {
 
-        this.mergeGroup(groupHandle, group, false, false);
+        return this.mergeGroup(groupHandle, group, false, false);
     }
 
     /**
@@ -633,12 +665,12 @@ public class ITunesUConnection {
      * @param mergeByHandle If true, merge tracks by handle.
      *                      Otherwise, merge by name.
      */
-    public void mergeGroup(String groupHandle,
-                           Group group,
-                           boolean mergeByHandle)
+    public ITunesUResponse mergeGroup(String groupHandle,
+                                      Group group,
+                                      boolean mergeByHandle)
         throws ITunesUException {
 
-        this.mergeGroup(groupHandle, group, mergeByHandle, false);
+        return this.mergeGroup(groupHandle, group, mergeByHandle, false);
     }
 
     /**
@@ -651,21 +683,14 @@ public class ITunesUConnection {
      * @param destructive If true, delete any unspecified
      *                    tracks or permissions.
      */
-    public void mergeGroup(String groupHandle,
-                           Group group,
-                           boolean mergeByHandle,
-                           boolean destructive)
+    public ITunesUResponse mergeGroup(String groupHandle,
+                                      Group group,
+                                      boolean mergeByHandle,
+                                      boolean destructive)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("GroupHandle", groupHandle);
-        arguments.put("Group", group);
-        arguments.put("MergeByHandle", mergeByHandle ? "true" : "false");
-        arguments.put("Destructive", destructive ? "true" : "false");
-
-        ITunesUDocument doc = new ITunesUDocument("MergeGroup", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergeGroup(groupHandle, group, mergeByHandle, destructive);
+        return this.send(null, doc);
     }
 
     /**
@@ -674,20 +699,12 @@ public class ITunesUConnection {
      * @param parentHandle Handle for the parent group.
      * @param track Object containing track information.
      */
-    public void addTrack(String parentHandle,
-                         Track track)
+    public ITunesUResponse addTrack(String parentHandle,
+                                    Track track)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (parentHandle != null) {
-            arguments.put("ParentHandle", parentHandle);
-        }
-
-        arguments.put("Track", track);
-
-        ITunesUDocument doc = new ITunesUDocument("AddTrack", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildAddTrack(parentHandle, track);
+        return this.send(null, doc);
     }
 
     /**
@@ -695,17 +712,11 @@ public class ITunesUConnection {
      *
      * @param trackHandle Handle for the track to delete.
      */
-    public void deleteTrack(String trackHandle)
+    public ITunesUResponse deleteTrack(String trackHandle)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (trackHandle != null) {
-            arguments.put("TrackHandle", trackHandle);
-        }
-
-        ITunesUDocument doc = new ITunesUDocument("DeleteTrack", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildDeleteTrack(trackHandle);
+        return this.send(null, doc);
     }
 
     /**
@@ -714,20 +725,12 @@ public class ITunesUConnection {
      * @param trackHandle Handle for the track to update.
      * @param track Object containing track information.
      */
-    public void mergeTrack(String trackHandle,
-                           Track track)
+    public ITunesUResponse mergeTrack(String trackHandle,
+                                      Track track)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (trackHandle != null) {
-            arguments.put("TrackHandle", trackHandle);
-        }
-
-        arguments.put("Track", track);
-
-        ITunesUDocument doc = new ITunesUDocument("MergeTrack", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergeTrack(trackHandle, track);
+        return this.send(null, doc);
     }
 
     /**
@@ -736,17 +739,12 @@ public class ITunesUConnection {
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
      */
-    public void addPermission(String parentHandle,
-                              Permission permission)
+    public ITunesUResponse addPermission(String parentHandle,
+                                         Permission permission)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("ParentHandle", parentHandle);
-        arguments.put("Permission", permission);
-
-        ITunesUDocument doc = new ITunesUDocument("AddPermission", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildAddPermission(parentHandle, permission);
+        return this.send(null, doc);
     }
 
     /**
@@ -755,18 +753,12 @@ public class ITunesUConnection {
      * @param parentHandle Handle for the parent section, course, or group.
      * @param credential Credential of permission to delete.
      */
-    public void deletePermission(String parentHandle,
-                                 String credential)
+    public ITunesUResponse deletePermission(String parentHandle,
+                                            String credential)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("ParentHandle", parentHandle);
-        arguments.put("Credential", credential);
-
-        ITunesUDocument doc =
-            new ITunesUDocument("DeletePermission", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildDeletePermission(parentHandle, credential);
+        return this.send(null, doc);
     }
 
     /**
@@ -775,17 +767,12 @@ public class ITunesUConnection {
      * @param parentHandle Handle for the parent section, course, or group.
      * @param permission Object containing permission information.
      */
-    public void mergePermission(String parentHandle,
-                                Permission permission)
+    public ITunesUResponse mergePermission(String parentHandle,
+                                           Permission permission)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("ParentHandle", parentHandle);
-        arguments.put("Permission", permission);
-
-        ITunesUDocument doc = new ITunesUDocument("MergePermission", arguments);
-        this.send(null, doc);
+        ITunesUDocument doc = ITunesUDocument.buildMergePermission(parentHandle, permission);
+        return this.send(null, doc);
     }
 
     /**
@@ -793,13 +780,9 @@ public class ITunesUConnection {
      *
      * @param credential The credential to add.
      */
-    public void addCredential(String credential) throws ITunesUException {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("Credential", credential);
-
-        ITunesUDocument doc = new ITunesUDocument("AddCredential", arguments);
-        this.send(null, doc);
+    public ITunesUResponse addCredential(String credential) throws ITunesUException {
+        ITunesUDocument doc = ITunesUDocument.buildAddCredential(credential);
+        return this.send(null, doc);
     }
 
     /**
@@ -807,13 +790,9 @@ public class ITunesUConnection {
      *
      * @param credential The credential to delete.
      */
-    public void deleteCredential(String credential) throws ITunesUException {
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        arguments.put("Credential", credential);
-
-        ITunesUDocument doc = new ITunesUDocument("DeleteCredential", arguments);
-        this.send(null, doc);
+    public ITunesUResponse deleteCredential(String credential) throws ITunesUException {
+        ITunesUDocument doc = ITunesUDocument.buildDeleteCredential(credential);
+        return this.send(null, doc);
     }
 
     /**
@@ -848,15 +827,10 @@ public class ITunesUConnection {
     public String showTree(String handle, String keyGroup)
         throws ITunesUException {
 
-        Map<String, Object> arguments = new HashMap<String, Object>();
-
-        if (handle != null) {
-            arguments.put("Handle", handle);
+        if (handle == null) {
+            handle = "";
         }
-
-        arguments.put("KeyGroup", keyGroup);
-
-        ITunesUDocument doc = new ITunesUDocument("ShowTree", arguments);
+        ITunesUDocument doc = ITunesUDocument.buildShowTree(handle, keyGroup);
 
         try {
             return this.execute(null, doc.toXml());
@@ -956,26 +930,28 @@ public class ITunesUConnection {
      * @param handle Handle for the destination.
      * @param content A File object containing the content to upload.
      */
-    public void uploadContent(String handle,
-                              File content) throws ITunesUException {
+    public String uploadContent(String handle,
+                                File content) throws ITunesUException {
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         String uploadUrl = this.getUploadUrl(handle, false);
 
-        String result;
+        String response;
 
         try {
-            result = iTunesUFilePOST.invokeAction(uploadUrl,
-                                                  "file",
-                                                  content,
-                                                  "application/octet-stream");
+            response = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                    "file",
+                                                    content,
+                                                    "application/octet-stream");
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         } catch (FileNotFoundException e) {
             throw new ITunesUException(e);
         }
 
-        if ("!".equals(result)) {
+        if ("!".equals(response)) {
             throw new ITunesUException("Error uploading content");
+        } else {
+            return response;
         }
     }
 
@@ -987,32 +963,34 @@ public class ITunesUConnection {
      * @param content Stream of the file content.
      * @param contentLength Length of the file, in bytes.
      */
-    public void uploadContent(String handle,
-                              String fileName,
-                              InputStream content,
-                              int contentLength) throws ITunesUException {
+    public String uploadContent(String handle,
+                                String fileName,
+                                InputStream content,
+                                int contentLength) throws ITunesUException {
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         String uploadUrl = this.getUploadUrl(handle, false);
 
-        String result;
+        String response;
 
         try {
-            result = iTunesUFilePOST.invokeAction(uploadUrl,
-                                                  "file",
-                                                  fileName,
-                                                  content,
-                                                  contentLength,
-                                                  "application/octet-stream");
+            response = iTunesUFilePOST.invokeAction(uploadUrl,
+                                                    "file",
+                                                    fileName,
+                                                    content,
+                                                    contentLength,
+                                                    "application/octet-stream");
         } catch (AssertionError e) {
             throw new ITunesUException(e);
         }
 
-        if ("!".equals(result)) {
+        if ("!".equals(response)) {
             throw new ITunesUException("Error uploading content");
+        } else {
+            return response;
         }
     }
 
-    private void send(String handle, ITunesUDocument doc)
+    private ITunesUResponse send(String handle, ITunesUDocument doc)
         throws ITunesUException {
 
         String result;
@@ -1025,11 +1003,11 @@ public class ITunesUConnection {
             throw new ITunesUException(e);
         }
 
-        Pattern pattern = Pattern.compile(".*<error>(.*)</error>.*",
-                                          Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(result);
-        if (matcher.matches()) {
-            throw new ITunesUException(matcher.group(1));
+        ITunesUResponse response = ITunesUResponse.fromXml(result);
+        if (response.getError() != null && !"".equals(response.getError())) {
+            throw new ITunesUException(response.getError());
+        } else {
+            return response;
         }
     }
 
@@ -1037,7 +1015,7 @@ public class ITunesUConnection {
         throws ITunesUException {
 
         String url = this.getUploadUrl(handle, true);
-        
+
         ITunesUFilePOST iTunesUFilePOST = new ITunesUFilePOST();
         try {
             if (this.debug) System.err.println("Request URL:\n" + url);
@@ -1092,5 +1070,54 @@ public class ITunesUConnection {
 
     private String getSiteDomain() {
         return this.siteUrl.substring(this.siteUrl.lastIndexOf('/') + 1);
+    }
+
+    private static List<Element> getElementsByXPath(String xml, String pattern)
+        throws ITunesUException {
+        DocumentBuilderFactory docFactory =
+            DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder;
+        try {
+            docBuilder = docFactory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new ITunesUException(e);
+        }
+        Document doc;
+        try {
+            doc = docBuilder.parse(new InputSource(new StringReader(xml)));
+        } catch (SAXException e) {
+            throw new ITunesUException(e);
+        } catch (IOException e) {
+            throw new ITunesUException(e);
+        }
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        XPathExpression expr;
+        try {
+            expr = xpath.compile(pattern);
+        } catch (XPathExpressionException e) {
+            throw new ITunesUException(e);
+        }
+        NodeList nodeList;
+        try {
+            nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        } catch (XPathExpressionException e) {
+            throw new ITunesUException(e);
+        }
+        List<Element> result = new ArrayList<Element>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            result.add((Element) nodeList.item(i));
+        }
+        return result;
+    }
+    
+    private static Element getElementByXPath(String xml, String pattern)
+        throws ITunesUException {
+        List<Element> elements = getElementsByXPath(xml, pattern);
+        if (elements.size() > 0) {
+            return elements.get(0);
+        } else {
+            return null;
+        }
     }
 }

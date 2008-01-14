@@ -48,15 +48,17 @@ import org.w3c.dom.NodeList;
 /**
  * A collection of {@link Group} objects.
  */
-public class Course implements SectionItem {
+public class Course extends ITunesUElement implements SectionItem {
     private String name;
     private String handle;
-    private String identifier;
     private String shortName;
+    private String identifier;
     private String instructor;
     private String description;
     private List<Permission> permissions;
     private List<Group> groups;
+    private Boolean allowSubscription;
+    private String themeHandle;
 
     public Course() {
         this.permissions = new ArrayList<Permission>();
@@ -65,20 +67,24 @@ public class Course implements SectionItem {
 
     public Course(String name,
                   String handle,
-                  String identifier,
                   String shortName,
+                  String identifier,
                   String instructor,
                   String description,
                   List<Permission> permissions,
-                  List<Group> groups) {
+                  List<Group> groups,
+                  Boolean allowSubscription,
+                  String themeHandle) {
         this.name = name;
         this.handle = handle;
-        this.identifier = identifier;
         this.shortName = shortName;
+        this.identifier = identifier;
         this.instructor = instructor;
         this.description = description;
         this.permissions = permissions;
         this.groups = groups;
+        this.allowSubscription = allowSubscription;
+        this.themeHandle = themeHandle;
     }
 
     public String getName() {
@@ -89,12 +95,12 @@ public class Course implements SectionItem {
         return this.handle;
     }
 
-    public String getIdentifier() {
-        return this.identifier;
-    }
-
     public String getShortName() {
         return this.shortName;
+    }
+
+    public String getIdentifier() {
+        return this.identifier;
     }
 
     public String getInstructor() {
@@ -113,6 +119,14 @@ public class Course implements SectionItem {
         return this.groups;
     }
 
+    public Boolean getAllowSubscription() {
+        return this.allowSubscription;
+    }
+
+    public String getThemeHandle() {
+        return this.themeHandle;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -121,12 +135,12 @@ public class Course implements SectionItem {
         this.handle = handle;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public void setShortName(String shortName) {
         this.shortName = shortName;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public void setInstructor(String instructor) {
@@ -145,6 +159,14 @@ public class Course implements SectionItem {
         this.groups = groups;
     }
 
+    public void setAllowSubscription(Boolean allowSubscription) {
+        this.allowSubscription = allowSubscription;
+    }
+
+    public void setThemeHandle(String themeHandle) {
+        this.themeHandle = themeHandle;
+    }
+
     public Element toXmlElement(Document doc) {
         Element element = doc.createElement("Course");
         if (this.name != null) {
@@ -157,15 +179,15 @@ public class Course implements SectionItem {
             handleElement.setTextContent(this.handle);
             element.appendChild(handleElement);
         }
-        if (this.identifier != null) {
-            Element identifierElement = doc.createElement("Identifier");
-            identifierElement.setTextContent(this.identifier);
-            element.appendChild(identifierElement);
-        }
         if (this.shortName != null) {
             Element shortNameElement = doc.createElement("ShortName");
             shortNameElement.setTextContent(this.shortName);
             element.appendChild(shortNameElement);
+        }
+        if (this.identifier != null) {
+            Element identifierElement = doc.createElement("Identifier");
+            identifierElement.setTextContent(this.identifier);
+            element.appendChild(identifierElement);
         }
         if (this.instructor != null) {
             Element instructorElement = doc.createElement("Instructor");
@@ -183,6 +205,18 @@ public class Course implements SectionItem {
         for (Group group : this.groups) {
             element.appendChild(group.toXmlElement(doc));
         }
+        if (this.allowSubscription != null) {
+            Element allowSubscriptionElement =
+                doc.createElement("AllowSubscription");
+            allowSubscriptionElement.setTextContent(this.allowSubscription
+                                                    ? "true" : "false");
+            element.appendChild(allowSubscriptionElement);
+        }
+        if (this.themeHandle != null) {
+            Element themeHandleElement = doc.createElement("ThemeHandle");
+            themeHandleElement.setTextContent(this.themeHandle);
+            element.appendChild(themeHandleElement);
+        }
         return element;
     }
 
@@ -193,12 +227,14 @@ public class Course implements SectionItem {
         }
         String name = null;
         String handle = null;
-        String identifier = null;
         String shortName = null;
+        String identifier = null;
         String instructor = null;
         String description = null;
         List<Permission> permissions = new ArrayList<Permission>();
         List<Group> groups = new ArrayList<Group>();
+        Boolean allowSubscription = null;
+        String themeHandle = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -207,10 +243,10 @@ public class Course implements SectionItem {
                     name = childNode.getTextContent();
                 } else if ("Handle".equals(childNode.getNodeName())) {
                     handle = childNode.getTextContent();
-                } else if ("Identifier".equals(childNode.getNodeName())) {
-                    identifier = childNode.getTextContent();
                 } else if ("ShortName".equals(childNode.getNodeName())) {
                     shortName = childNode.getTextContent();
+                } else if ("Identifier".equals(childNode.getNodeName())) {
+                    identifier = childNode.getTextContent();
                 } else if ("Instructor".equals(childNode.getNodeName())) {
                     instructor = childNode.getTextContent();
                 } else if ("Description".equals(childNode.getNodeName())) {
@@ -219,17 +255,23 @@ public class Course implements SectionItem {
                     permissions.add(Permission.fromXmlElement((Element) childNode));
                 } else if ("Group".equals(childNode.getNodeName())) {
                     groups.add(Group.fromXmlElement((Element) childNode));
+                } else if ("AllowSubscription".equals(childNode.getNodeName())) {
+                    allowSubscription = "true".equals(childNode.getTextContent());
+                } else if ("ThemeHandle".equals(childNode.getNodeName())) {
+                    themeHandle = childNode.getTextContent();
                 }
             }
         }
         return new Course(name,
                           handle,
-                          identifier,
                           shortName,
+                          identifier,
                           instructor,
                           description,
                           permissions,
-                          groups);
+                          groups,
+                          allowSubscription,
+                          themeHandle);
     }
 
     public static Course fromXml(String xml)
@@ -254,7 +296,7 @@ public class Course implements SectionItem {
     }
 
     public String toString() {
-    	return (super.toString()
+        return (super.toString()
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="
