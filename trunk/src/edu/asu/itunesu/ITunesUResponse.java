@@ -48,6 +48,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/**
+ * A response from an iTunesU Web Services API call.
+ */
 public class ITunesUResponse {
     private String version;
     private String error;
