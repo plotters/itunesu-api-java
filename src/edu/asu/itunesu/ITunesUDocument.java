@@ -47,6 +47,9 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Used internally to construct XML requests. 
+ */
 public class ITunesUDocument {
     public static final String VERSION = "1.0.2";
 
