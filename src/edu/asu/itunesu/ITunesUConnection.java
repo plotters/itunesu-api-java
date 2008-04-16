@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, Arizona State University
+ * Copyright (c) 2007-2008, Arizona State University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -694,6 +694,18 @@ public class ITunesUConnection {
     }
 
     /**
+     * Requests for a group to update its feed content
+     *
+     * @param groupHandle Handle for the group to update.
+     */
+    public ITunesUResponse updateGroup(String groupHandle)
+        throws ITunesUException {
+
+        ITunesUDocument doc = ITunesUDocument.buildUpdateGroup(groupHandle);
+        return this.send(null, doc);
+    }
+
+    /**
      * Adds a track to a group.
      *
      * @param parentHandle Handle for the parent group.
@@ -772,26 +784,6 @@ public class ITunesUConnection {
         throws ITunesUException {
 
         ITunesUDocument doc = ITunesUDocument.buildMergePermission(parentHandle, permission);
-        return this.send(null, doc);
-    }
-
-    /**
-     * Adds a credential.
-     *
-     * @param credential The credential to add.
-     */
-    public ITunesUResponse addCredential(String credential) throws ITunesUException {
-        ITunesUDocument doc = ITunesUDocument.buildAddCredential(credential);
-        return this.send(null, doc);
-    }
-
-    /**
-     * Deletes a credential.
-     *
-     * @param credential The credential to delete.
-     */
-    public ITunesUResponse deleteCredential(String credential) throws ITunesUException {
-        ITunesUDocument doc = ITunesUDocument.buildDeleteCredential(credential);
         return this.send(null, doc);
     }
 
