@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, Arizona State University
+ * Copyright (c) 2007-2008, Arizona State University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ import org.w3c.dom.Element;
  * Used internally to construct XML requests. 
  */
 public class ITunesUDocument {
-    public static final String VERSION = "1.0.2";
+    public static final String VERSION = "1.1";
 
     private String method;
     private Map<String, Object> arguments;
@@ -270,6 +270,13 @@ public class ITunesUDocument {
         return doc;
     }
 
+    public static ITunesUDocument buildUpdateGroup(String groupHandle) {
+        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+        arguments.put("GroupHandle", groupHandle);
+        ITunesUDocument doc = new ITunesUDocument("UpdateGroup", arguments);
+        return doc;
+    }
+
     public static ITunesUDocument buildAddTrack(String parentHandle, Track track) {
         Map<String, Object> arguments = new LinkedHashMap<String, Object>();
         arguments.put("ParentHandle", parentHandle);
@@ -318,20 +325,6 @@ public class ITunesUDocument {
         arguments.put("ParentPath", "");
         arguments.put("Permission", permission);
         ITunesUDocument doc = new ITunesUDocument("MergePermission", arguments);
-        return doc;
-    }
-
-    public static ITunesUDocument buildAddCredential(String credential) {
-        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
-        arguments.put("Credential", credential);
-        ITunesUDocument doc = new ITunesUDocument("AddCredential", arguments);
-        return doc;
-    }
-
-    public static ITunesUDocument buildDeleteCredential(String credential) {
-        Map<String, Object> arguments = new LinkedHashMap<String, Object>();
-        arguments.put("Credential", credential);
-        ITunesUDocument doc = new ITunesUDocument("DeleteCredential", arguments);
         return doc;
     }
 }

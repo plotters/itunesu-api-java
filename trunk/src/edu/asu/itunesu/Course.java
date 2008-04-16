@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, Arizona State University
+ * Copyright (c) 2007-2008, Arizona State University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -199,9 +199,6 @@ public class Course extends ITunesUElement implements SectionItem {
             descriptionElement.setTextContent(this.description);
             element.appendChild(descriptionElement);
         }
-        for (Permission permission : this.permissions) {
-            element.appendChild(permission.toXmlElement(doc));
-        }
         for (Group group : this.groups) {
             element.appendChild(group.toXmlElement(doc));
         }
@@ -216,6 +213,9 @@ public class Course extends ITunesUElement implements SectionItem {
             Element themeHandleElement = doc.createElement("ThemeHandle");
             themeHandleElement.setTextContent(this.themeHandle);
             element.appendChild(themeHandleElement);
+        }
+        for (Permission permission : this.permissions) {
+            element.appendChild(permission.toXmlElement(doc));
         }
         return element;
     }
