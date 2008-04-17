@@ -61,6 +61,10 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:ramen@asu.edu">Dave Benjamin</a>
  */
 public class ITunesUConnection {
+    public static final String KEY_GROUP_MINIMAL = "minimal";
+    public static final String KEY_GROUP_MOST    = "most";
+    public static final String KEY_GROUP_MAXIMAL = "maximal";
+
     private String siteUrl;
     private String debugSuffix;
     private String sharedSecret;
@@ -157,7 +161,7 @@ public class ITunesUConnection {
      * @return A {@link Site} model object.
      */
     public Site getSite() throws ITunesUException {
-        return Site.fromXml(this.showTree(null));
+        return ITunesUResponse.fromXml(this.showTree(null)).getSite();
     }
 
     /**
@@ -168,7 +172,7 @@ public class ITunesUConnection {
      * @return A {@link Site} model object.
      */
     public Site getSiteMinimal() throws ITunesUException {
-        return ITunesUResponse.fromXml(this.showTree(null, "minimal")).getSite();
+        return ITunesUResponse.fromXml(this.showTree(null, KEY_GROUP_MINIMAL)).getSite();
     }
 
     /**
@@ -788,7 +792,9 @@ public class ITunesUConnection {
     }
 
     /**
-     * Reads XML for an element by its handle.
+     * Reads XML for an element by its handle. This version of ShowTree uses
+     * the simple URL-based (/API/ShowTree/) retrieval method, which produces
+     * the same results as the "most" key group.
      *
      * @param handle Handle of the parent element, or null for the whole site.
      * @return An XML string.
@@ -810,7 +816,8 @@ public class ITunesUConnection {
     }
 
     /**
-     * Reads XML for an element by its handle, specifying a key group.
+     * Reads XML for an element by its handle, specifying a key group. This
+     * version of ShowTree uses the XML-based ITunesUDocument retrieval method.
      *
      * @param handle Handle of the parent element, or null for the whole site.
      * @param keyGroup Must be one of: minimal, most, maximal
