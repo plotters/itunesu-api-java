@@ -300,7 +300,7 @@ public class Course extends ITunesUElement implements SectionItem {
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="
-                + (this.getHandle() == null ? "<handle>" : this.getHandle())
+                + (this.getHandle() == null ? "<null>" : this.getHandle())
                 + "]");
     }
 }
