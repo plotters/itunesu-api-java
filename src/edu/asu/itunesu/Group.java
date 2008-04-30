@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008, Arizona State University
+ * Copyright (c) 2007, Arizona State University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,17 +49,10 @@ import org.w3c.dom.NodeList;
  * A collection of {@link Track} objects, viewable as a tab.
  */
 public class Group extends ITunesUElement {
-    public static final String GROUP_TYPE_SIMPLE = "Simple";
-    public static final String GROUP_TYPE_SMART  = "Smart";
-    public static final String GROUP_TYPE_FEED   = "Feed";
-
     private String name;
     private String handle;
-    private String groupType;
     private List<Track> tracks;
     private List<Permission> permissions;
-    private Boolean allowSubscription;
-    private ExternalFeed externalFeed;
 
     public Group() {
         this.tracks = new ArrayList<Track>();
@@ -68,18 +61,12 @@ public class Group extends ITunesUElement {
 
     public Group(String name,
                  String handle,
-                 String groupType,
                  List<Track> tracks,
-                 List<Permission> permissions,
-                 Boolean allowSubscription,
-                 ExternalFeed externalFeed) {
+                 List<Permission> permissions) {
         this.name = name;
         this.handle = handle;
-        this.groupType = groupType;
         this.tracks = tracks;
         this.permissions = permissions;
-        this.allowSubscription = allowSubscription;
-        this.externalFeed = externalFeed;
     }
 
     public String getName() {
@@ -90,24 +77,12 @@ public class Group extends ITunesUElement {
         return this.handle;
     }
 
-    public String getGroupType() {
-        return this.groupType;
-    }
-
     public List<Track> getTracks() {
         return this.tracks;
     }
 
     public List<Permission> getPermissions() {
         return this.permissions;
-    }
-
-    public Boolean getAllowSubscription() {
-        return this.allowSubscription;
-    }
-
-    public ExternalFeed getExternalFeed() {
-        return this.externalFeed;
     }
 
     public void setName(String name) {
@@ -118,24 +93,12 @@ public class Group extends ITunesUElement {
         this.handle = handle;
     }
 
-    public void setGroupType(String groupType) {
-        this.groupType = groupType;
-    }
-
     public void setTracks(List<Track> tracks) {
         this.tracks = tracks;
     }
 
     public void setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
-    }
-
-    public void setAllowSubscription(Boolean allowSubscription) {
-        this.allowSubscription = allowSubscription;
-    }
-
-    public void setExternalFeed(ExternalFeed externalFeed) {
-        this.externalFeed = externalFeed;
     }
 
     public Element toXmlElement(Document doc) {
@@ -150,26 +113,11 @@ public class Group extends ITunesUElement {
             handleElement.setTextContent(this.handle);
             element.appendChild(handleElement);
         }
-        if (this.groupType != null) {
-            Element groupTypeElement = doc.createElement("GroupType");
-            groupTypeElement.setTextContent(this.groupType);
-            element.appendChild(groupTypeElement);
-        }
         for (Track track : this.tracks) {
             element.appendChild(track.toXmlElement(doc));
         }
         for (Permission permission : this.permissions) {
             element.appendChild(permission.toXmlElement(doc));
-        }
-        if (this.allowSubscription != null) {
-            Element allowSubscriptionElement =
-                doc.createElement("AllowSubscription");
-            allowSubscriptionElement.setTextContent(this.allowSubscription
-                                                    ? "true" : "false");
-            element.appendChild(allowSubscriptionElement);
-        }
-        if (this.externalFeed != null) {
-            element.appendChild(this.externalFeed.toXmlElement(doc));
         }
         return element;
     }
@@ -181,11 +129,8 @@ public class Group extends ITunesUElement {
         }
         String name = null;
         String handle = null;
-        String groupType = null;
         List<Track> tracks = new ArrayList<Track>();
         List<Permission> permissions = new ArrayList<Permission>();
-        Boolean allowSubscription = null;
-        ExternalFeed externalFeed = null;
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
@@ -194,20 +139,14 @@ public class Group extends ITunesUElement {
                     name = childNode.getTextContent();
                 } else if ("Handle".equals(childNode.getNodeName())) {
                     handle = childNode.getTextContent();
-                } else if ("GroupType".equals(childNode.getNodeName())) {
-                    groupType = childNode.getTextContent();
                 } else if ("Track".equals(childNode.getNodeName())) {
                     tracks.add(Track.fromXmlElement((Element) childNode));
                 } else if ("Permission".equals(childNode.getNodeName())) {
                     permissions.add(Permission.fromXmlElement((Element) childNode));
-                } else if ("AllowSubscription".equals(childNode.getNodeName())) {
-                    allowSubscription = "true".equals(childNode.getTextContent());
-                } else if ("ExternalFeed".equals(childNode.getNodeName())) {
-                    externalFeed = ExternalFeed.fromXmlElement((Element) childNode);
                 }
             }
         }
-        return new Group(name, handle, groupType, tracks, permissions, allowSubscription, externalFeed);
+        return new Group(name, handle, tracks, permissions);
     }
 
     public static Group fromXml(String xml)
@@ -236,7 +175,7 @@ public class Group extends ITunesUElement {
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="
-                + (this.getHandle() == null ? "<null>" : this.getHandle())
+                + (this.getHandle() == null ? "<handle>" : this.getHandle())
                 + "]");
     }
 }

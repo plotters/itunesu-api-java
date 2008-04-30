@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008, Arizona State University
+ * Copyright (c) 2007, Arizona State University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -260,7 +260,7 @@ public class Division extends ITunesUElement implements SectionItem {
                 + "[name="
                 + (this.getName() == null ? "<null>" : this.getName())
                 + ",handle="
-                + (this.getHandle() == null ? "<null>" : this.getHandle())
+                + (this.getHandle() == null ? "<handle>" : this.getHandle())
                 + "]");
     }
 }

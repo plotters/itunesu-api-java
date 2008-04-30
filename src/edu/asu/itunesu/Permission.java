@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008, Arizona State University
+ * Copyright (c) 2007, Arizona State University
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ import org.w3c.dom.NodeList;
  */
 public class Permission extends ITunesUElement {
     public static final String ACCESS_NO_ACCESS = "No Access";
-    public static final String ACCESS_STREAMING = "Streaming";
     public static final String ACCESS_DOWNLOAD  = "Download";
     public static final String ACCESS_DROP_BOX  = "Drop Box";
     public static final String ACCESS_SHARED    = "Shared";

@@ -15,7 +15,6 @@ import junit.framework.TestCase;
 
 import edu.asu.itunesu.Course;
 import edu.asu.itunesu.Division;
-import edu.asu.itunesu.ExternalFeed;
 import edu.asu.itunesu.Group;
 import edu.asu.itunesu.ITunesUDocument;
 import edu.asu.itunesu.ITunesUResponse;
@@ -26,8 +25,8 @@ import edu.asu.itunesu.Templates;
 import edu.asu.itunesu.Track;
 
 public class XsdTest extends TestCase {
-    public static String REQUEST_XSD_PATH = "iTunesURequest-1.1.xsd";
-    public static String RESPONSE_XSD_PATH = "iTunesUResponse-1.1.xsd";
+    public static String REQUEST_XSD_PATH = "iTunesURequest-1.0.2.xsd";
+    public static String RESPONSE_XSD_PATH = "iTunesUResponse-1.0.2.xsd";
 
     private static Validator buildValidator(String path) throws SAXException {
         SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
@@ -74,11 +73,13 @@ public class XsdTest extends TestCase {
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
 
+    /* NOT AVAILABLE IN XSD
     public void testAddDivisionNoTemplateHandle() throws Exception {
         Division division = sampleDivision();
         ITunesUDocument doc = ITunesUDocument.buildAddDivision("123456", null, division);
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
+    */
 
     public void testDeleteDivision() throws Exception {
         ITunesUDocument doc = ITunesUDocument.buildDeleteDivision("123456");
@@ -148,11 +149,6 @@ public class XsdTest extends TestCase {
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
 
-    public void testUpdateGroup() throws Exception {
-        ITunesUDocument doc = ITunesUDocument.buildUpdateGroup("123456");
-        this.requestValidator.validate(buildSource(doc.toXml()));
-    }
-    
     public void testAddTrack() throws Exception {
         Track track = sampleTrack();
         ITunesUDocument doc = ITunesUDocument.buildAddTrack("123456", track);
@@ -171,7 +167,7 @@ public class XsdTest extends TestCase {
     }
 
     public void testAddPermission() throws Exception {
-        Permission permission = new Permission("credential", "Shared");
+        Permission permission = new Permission("credential", "access");
         ITunesUDocument doc = ITunesUDocument.buildAddPermission("123456", permission);
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
@@ -182,11 +178,21 @@ public class XsdTest extends TestCase {
     }
 
     public void testMergePermission() throws Exception {
-        Permission permission = new Permission("credential", Permission.ACCESS_NO_ACCESS);
+        Permission permission = new Permission("credential", "access");
         ITunesUDocument doc = ITunesUDocument.buildMergePermission("123456", permission);
         this.requestValidator.validate(buildSource(doc.toXml()));
     }
 
+    public void testAddCredential() throws Exception {
+        ITunesUDocument doc = ITunesUDocument.buildAddCredential("credential");
+        this.requestValidator.validate(buildSource(doc.toXml()));
+    }
+
+    public void testDeleteCredential() throws Exception {
+        ITunesUDocument doc = ITunesUDocument.buildDeleteCredential("credential");
+        this.requestValidator.validate(buildSource(doc.toXml()));
+    }
+    
     public void testResponseEmpty() throws Exception {
         ITunesUResponse resp = new ITunesUResponse();
         this.responseValidator.validate(buildSource(resp.toXml()));
@@ -194,25 +200,25 @@ public class XsdTest extends TestCase {
 
     public void testResponseHandle() throws Exception {
         ITunesUResponse resp = new ITunesUResponse();
-        resp.setVersion("1.1");
+        resp.setVersion("1.0.2");
         resp.setAddedObjectHandle("123456");
         this.responseValidator.validate(buildSource(resp.toXml()));
     }
 
     public void testResponseError() throws Exception {
         ITunesUResponse resp = new ITunesUResponse();
-        resp.setVersion("1.1");
+        resp.setVersion("1.0.2");
         resp.setError("Something went wrong.");
         this.responseValidator.validate(buildSource(resp.toXml()));
     }
     
     public void testResponseSite() throws Exception {
-        ITunesUResponse resp = new ITunesUResponse("1.1", null, null, sampleSite());
+        ITunesUResponse resp = new ITunesUResponse("1.0.2", null, null, sampleSite());
         this.responseValidator.validate(buildSource(resp.toXml()));
     }
 
     public void testResponseRoundTrip() throws Exception {
-        ITunesUResponse resp = new ITunesUResponse("1.1", "error", "123456", sampleSite());
+        ITunesUResponse resp = new ITunesUResponse("1.0.2", "error", "123456", sampleSite());
         String xml1 = resp.toXml();
         resp = ITunesUResponse.fromXml(resp.toXml());
         String xml2 = resp.toXml();
@@ -223,13 +229,12 @@ public class XsdTest extends TestCase {
     private static Course sampleCourse() {
         Course course = new Course();
         course.setName("course name");
-        // course.setHandle("123456"); - Not available in Request XSD
+        // course.setHandle("123456"); - NOT AVAILABLE IN XSD
         course.setShortName("short name");
         course.setIdentifier("identifier");
         course.setInstructor("instructor");
         course.setDescription("description");
         course.getGroups().add(sampleGroup());
-        course.getPermissions().add(new Permission("credential", Permission.ACCESS_EDIT));
         course.setAllowSubscription(true);
         course.setThemeHandle("456543");
         return course;
@@ -241,34 +246,18 @@ public class XsdTest extends TestCase {
         division.setShortName("short name");
         division.setIdentifier("identifier");
         division.setAllowSubscription(false);
-        division.getPermissions().add(new Permission("credential", Permission.ACCESS_SHARED));
+        division.getPermissions().add(new Permission("credential", "access"));
         division.getSections().add(sampleSection());
         division.setThemeHandle("234567");
         return division;
-    }
-    
-    private static ExternalFeed sampleExternalFeed() {
-        ExternalFeed externalFeed = new ExternalFeed();
-        externalFeed.setUrl("http://example.com/rss");
-        externalFeed.setOwnerEmail("whatever@example.com");
-        externalFeed.setPollingInterval(ExternalFeed.POLLING_INTERVAL_DAILY);
-        externalFeed.setSecurityType(ExternalFeed.SECURITY_TYPE_BASIC);
-        externalFeed.setSignatureType(ExternalFeed.SIGNATURE_TYPE_SHA256);
-        externalFeed.setBasicAuthUsername("user");
-        // externalFeed.setBasicAuthPassword("password"); - Not available in Response XSD
-        // externalFeed.setStatus("ok"); - Not available in Request XSD
-        return externalFeed;
     }
 
     private static Group sampleGroup() {
         Group group = new Group();
         group.setName("group name");
         group.setHandle("345678");
-        group.setGroupType(Group.GROUP_TYPE_SIMPLE);
         group.getTracks().add(sampleTrack());
-        group.setAllowSubscription(true);
-        group.getPermissions().add(new Permission("credential", Permission.ACCESS_STREAMING));
-        group.setExternalFeed(sampleExternalFeed());
+        group.getPermissions().add(new Permission("credential", "access"));
         return group;
     }
 
@@ -285,7 +274,7 @@ public class XsdTest extends TestCase {
         site.setName("site name");
         site.setHandle("654321");
         site.setAllowSubscription(true);
-        site.getPermissions().add(new Permission("credential", Permission.ACCESS_DROP_BOX));
+        site.getPermissions().add(new Permission("credential", "access"));
         site.getSections().add(sampleSection());
         site.setTemplates(sampleTemplates());
         site.setThemeHandle("765432");
