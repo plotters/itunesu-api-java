@@ -33,7 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * A {@link Division} or {@link Group} contained within a {@link Section}.
+ * A {@link Course} or {@link Division} contained within a {@link Section}.
  */
 public interface SectionItem {
     public String getName();
