@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<project name="itunesu-api-java" default="dist">
+ <path id="build.classpath">
+  <pathelement location="${basedir}/lib/junit-4.4.jar"/>
+ </path>
+ 
+ <target name="prepare">
+  <mkdir dir="${basedir}/target"/>
+  <mkdir dir="${basedir}/target/classes"/>
+ </target>
+ 
+ <target name="build" depends="prepare">
+  <javac srcdir="${basedir}/src" destdir="${basedir}/target/classes" classpathref="build.classpath"/>
+ </target>
+ 
+ <target name="dist" depends="build">
+  <jar destfile="${basedir}/target/itunesu-api-java.jar">
+   <fileset dir="${basedir}/target/classes"/>
+  </jar>
+ </target>
+
+</project>
