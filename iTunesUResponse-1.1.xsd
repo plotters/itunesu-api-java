@@ -1,0 +1,515 @@
+<?xml version="1.0"?>
+<!-- 
+    Changelog since 1.0.3
+    [1] Incremented version from 1.0.3 to 1.1
+    [2] Added GroupType element with constraints, added it as child of Group
+    [3] Added ExternalFeed element as child of Group and with children: URL, OwnerEmail, 
+        PollingInterval, SecurityType, SignatureType, BasicAuthUsername, Status
+    [4] Added minOccurs to children of Division
+    [5] Added enumeration restriction to Access content
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<xsd:element name="ITunesUResponse">
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Version" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="error" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element ref="AddedObjectHandle" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element ref="Site" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Version" type="xsd:string" fixed="1.1">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+        The Version node is required to appear once and as the first child of ITunesUResponse.  And as this is
+        the XSD for iTunes U Web Services Responses v 1.1, the value must be "1.1".
+        </xsd:documentation>
+    </xsd:annotation>
+</xsd:element>
+
+<xsd:element name="error" type="xsd:string">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+        Error messages may be present in the response.
+        </xsd:documentation>
+    </xsd:annotation>
+</xsd:element>
+
+<xsd:element name="AddedObjectHandle" type="xsd:string">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+        If the Web Services request includes a request to add an object, the "AddedObjectHandle" node will be returned
+        in the response, if successful, and represents the handle of the newly added object.
+        </xsd:documentation>
+    </xsd:annotation>
+</xsd:element>
+
+<xsd:element name="Site">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Site node is the root node of all data returned for a ShowTree request.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="AllowSubscription"/>
+                <xsd:element ref="AggregateFileSize"/>
+                <xsd:element ref="ThemeHandle"/>
+                <xsd:element ref="Permission"/>
+                <xsd:element ref="Section"/>
+                <xsd:element ref="TopDownloads"/>
+                <xsd:element ref="LinkCollection"/>
+                <xsd:element ref="Templates"/>
+                <xsd:element ref="CoverImage"/>
+                <xsd:element ref="BannerImage"/>
+                <xsd:element ref="ThumbnailImage"/>
+                <xsd:element ref="Theme"/>
+                <xsd:element ref="LinkCollectionSet"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="File">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The File node is a representation of the actual data file of a Track.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Path"/>
+                <xsd:element ref="Size"/>
+                <xsd:element ref="Hash"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="Shared"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Image">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Image node refers to an image in the associated context.  Similar to a Track it has a reference to a File
+            object and image-pertinent metadata.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="Height"/>
+            <xsd:element ref="Width"/>
+            <xsd:element ref="URL"/>
+            <xsd:element ref="File"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Track">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Track node refers to an iTunes media file (audio or video).  It can contain a reference to a
+            File as well as metadata, associated with the File, relevant to a media file.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="Kind"/>
+                <xsd:element ref="TrackNumber"/>
+                <xsd:element ref="DiscNumber"/>
+                <xsd:element ref="DurationMilliseconds"/>
+                <xsd:element ref="AlbumName"/>
+                <xsd:element ref="ArtistName"/>
+                <xsd:element ref="GenreName"/>
+                <xsd:element ref="DownloadURL"/>
+                <xsd:element ref="File"/>
+                <xsd:element ref="Comment"/>
+                <xsd:element ref="CoverImage"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Group">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Group node refers to a group of tracks (denoted visually with tabs in the iTunes client), and serves
+            as a way of grouping tracks within the same Course.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="GroupType" minOccurs="1"/>
+                <xsd:element ref="ShortName"/>
+                <xsd:element ref="Permission"/>
+                <xsd:element ref="Track"/>
+                <xsd:element ref="SharedObjects"/>
+                <xsd:element ref="AggregateFileSize"/>
+                <xsd:element ref="AllowSubscription"/>
+                <xsd:element ref="ExternalFeed" minOccurs="0"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="ExternalFeed">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="URL" minOccurs="0"/>
+            <xsd:element ref="OwnerEmail" minOccurs="0"/>
+            <xsd:element ref="PollingInterval" minOccurs="0"/>
+            <xsd:element ref="SecurityType" minOccurs="0"/>
+            <xsd:element ref="SignatureType" minOccurs="0"/>
+            <xsd:element ref="BasicAuthUsername" minOccurs="0"/>
+            <xsd:element ref="Status" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>    
+</xsd:element>
+
+<xsd:element name="Permission">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Permission node refers to the combination of a Credential and an Access for a given item.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Credential"/>
+            <xsd:element ref="Access"/>
+            <xsd:element ref="CustomAccess" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Section">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Section node refers to a group of Courses or Divisions, and it, with Division is the key entity
+            for developing course structure in your Site.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="AllowSubscription"/>
+                <xsd:element ref="Course"/>
+                <xsd:element ref="Division"/>
+                <xsd:element ref="AggregateFileSize"/>
+                <xsd:element ref="Permission"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="TopDownloads">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            iTunes U regularly computes and notes the top downloads within each site, using an algorithm defining track popularity.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name"/>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="FeedURL"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="LinkCollection">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            In the associated context, a LinkCollection represents a list of links to be displayed in a visual link box.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name"/>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="FeedURL"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Templates">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            Courses and divisions that are actually templates for the creation of other courses are displayed in the
+            Templates node.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="Permission"/>
+                <xsd:element ref="Course"/>
+                <xsd:element ref="Division"/>
+                <xsd:element ref="AggregateFileSize"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="SharedObjects">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="File"/>
+            <xsd:element ref="Image"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Division">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Division node refers to a group of Sections, and it, with Sections is the key entity
+            for developing course structure in your Site.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="LinkedFolderHandle"/>
+                <xsd:element ref="AggregateFileSize"/>
+                <xsd:element ref="Identifier"/>
+                <xsd:element ref="Permission"/>
+                <xsd:element ref="ShortName"/>
+                <xsd:element ref="CoverImage"/>
+                <xsd:element ref="BannerImage" minOccurs="0"/>
+                <xsd:element ref="ThumbnailImage" minOccurs="0"/>
+                <xsd:element ref="Section"/>
+                <xsd:element ref="LinkCollectionSet"/>
+                <xsd:element ref="ThemeHandle"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Course">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The Course node refers to a set of Groups.  A Course corresponds to a page with respect to the user interface
+            of iTunes.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="Instructor"/>
+                <xsd:element ref="Description"/>
+                <xsd:element ref="Identifier"/>
+                <xsd:element ref="ThemeHandle"/>
+                <xsd:element ref="ShortName"/>
+                <xsd:element ref="Permission"/>
+                <xsd:element ref="CoverImage"/>
+                <xsd:element ref="BannerImage"/>
+                <xsd:element ref="ThumbnailImage"/>
+                <xsd:element ref="Group"/>
+                <xsd:element ref="AggregateFileSize"/>
+                <xsd:element ref="LinkedFolderHandle"/>
+                <xsd:element ref="LinkCollectionSet"/>
+                <xsd:element ref="AllowSubscription"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="CoverImage">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The CoverImage node represents artwork associated with the Site, Division, Course, or Track.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="Shared"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="BannerImage">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            The BannerImage node represents artwork associated with the Site, Division, or Course.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="Shared"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="ThumbnailImage">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="Shared"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Theme">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            A theme is a set of appearance attributes (text color, background colors, data formats, etc.) that may
+            be applied to a page in your iTunes U site.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+        <xsd:sequence maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="Name"/>
+                <xsd:element ref="Handle"/>
+                <xsd:element ref="BackgroundColor"/>
+                <xsd:element ref="LineColor"/>
+                <xsd:element ref="LinkArrowColor"/>
+                <xsd:element ref="LinkBackgroundColor"/>
+                <xsd:element ref="LinkBackgroundColorAlpha"/>
+                <xsd:element ref="LinkBoxColor"/>
+                <xsd:element ref="LinkTextColor"/>
+                <xsd:element ref="LinkTitleColor"/>
+                <xsd:element ref="LoginURL"/>
+                <xsd:element ref="RegularTextColor"/>
+                <xsd:element ref="TitleTextColor"/>
+                <xsd:element ref="TimeFormat"/>
+                <xsd:element ref="DateFormat"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="LinkCollectionSet">
+    <xsd:complexType>
+        <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+            <xsd:choice>
+                <xsd:element ref="LinkCollection"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Handle" type="xsd:string"/>
+<xsd:element name="Shared" type="xsd:string"/>
+<xsd:element name="Height" type="xsd:string"/>
+<xsd:element name="Width" type="xsd:string"/>
+<xsd:element name="URL" type="xsd:string"/>
+<xsd:element name="Name" type="xsd:string"/>
+<xsd:element name="AllowSubscription" type="xsd:string"/>
+<xsd:element name="Path" type="xsd:string"/>
+<xsd:element name="Size" type="xsd:string"/>
+<xsd:element name="Hash" type="xsd:string"/>
+<xsd:element name="Kind" type="xsd:string"/>
+<xsd:element name="TrackNumber" type="xsd:string"/>
+<xsd:element name="DiscNumber" type="xsd:string"/>
+<xsd:element name="DurationMilliseconds" type="xsd:string"/>
+<xsd:element name="AlbumName" type="xsd:string"/>
+<xsd:element name="ArtistName" type="xsd:string"/>
+<xsd:element name="GenreName" type="xsd:string"/>
+<xsd:element name="DownloadURL" type="xsd:string"/>
+<xsd:element name="Credential" type="xsd:string"/>
+<xsd:element name="Access">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="No Access"/>
+            <xsd:enumeration value="Streaming"/>
+            <xsd:enumeration value="Download"/>
+            <xsd:enumeration value="Drop Box"/>
+            <xsd:enumeration value="Shared"/>
+            <xsd:enumeration value="Edit"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+<xsd:element name="FeedURL" type="xsd:string"/>
+<xsd:element name="Instructor" type="xsd:string"/>
+<xsd:element name="Description" type="xsd:string"/>
+<xsd:element name="Identifier" type="xsd:string"/>
+<xsd:element name="ShortName" type="xsd:string"/>
+<xsd:element name="AggregateFileSize" type="xsd:string"/>
+<xsd:element name="Comment" type="xsd:string"/>
+<xsd:element name="LinkedFolderHandle" type="xsd:string"/>
+<xsd:element name="CustomAccess" type="xsd:string"/>
+<xsd:element name="ThemeHandle" type="xsd:string"/>
+<xsd:element name="BackgroundColor" type="xsd:string"/>
+<xsd:element name="LineColor" type="xsd:string"/>
+<xsd:element name="LinkArrowColor" type="xsd:string"/>
+<xsd:element name="LinkBackgroundColor" type="xsd:string"/>
+<xsd:element name="LinkBackgroundColorAlpha" type="xsd:string"/>
+<xsd:element name="LinkBoxColor" type="xsd:string"/>
+<xsd:element name="LinkTextColor" type="xsd:string"/>
+<xsd:element name="LinkTitleColor" type="xsd:string"/>
+<xsd:element name="LoginURL" type="xsd:string"/>
+<xsd:element name="RegularTextColor" type="xsd:string"/>
+<xsd:element name="TitleTextColor" type="xsd:string"/>
+<xsd:element name="TimeFormat" type="xsd:string"/>
+<xsd:element name="DateFormat" type="xsd:string"/>
+
+<xsd:element name="GroupType">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Simple"/>
+            <xsd:enumeration value="Smart"/>
+            <xsd:enumeration value="Feed"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+    
+<xsd:element name="OwnerEmail" type="xsd:string"/>
+    
+<xsd:element name="PollingInterval">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Never"/>
+            <xsd:enumeration value="Daily"/>
+        </xsd:restriction>    
+    </xsd:simpleType>
+</xsd:element>
+
+<xsd:element name="SecurityType">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="HTTP Basic Authentication"/>
+        </xsd:restriction>    
+    </xsd:simpleType>
+</xsd:element>
+    
+<xsd:element name="SignatureType">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="Append SHA-256"/>
+        </xsd:restriction>    
+    </xsd:simpleType>
+</xsd:element>
+    
+<xsd:element name="BasicAuthUsername" type="xsd:string" />
+<xsd:element name="Status" type="xsd:string"/>
+</xsd:schema>
