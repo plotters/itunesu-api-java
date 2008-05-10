@@ -1,0 +1,479 @@
+<?xml version="1.0"?>
+<!-- 
+    Changelog since 1.0.3
+    [1] Incremented version from 1.0.3 to 1.1
+    [2] minOccurs added to Handle and KeyGroup as children of ShowTree
+    [3] AddCredential, DeleteCredential elements removed
+    [4] AllowSubscription noted as a feasible child of Group
+    [5] minOccurs added to Name as a child of Group
+    [6] minOccurs added to children of MergeGroup, AddGroup, and MergeCourse, 
+            AddDivision, Division Section
+    [7] Added GroupType element with constraints, added it as child of Group
+    [8] Added ExternalFeed element as child of Group and with children: URL, OwnerEmail, 
+            PollingInterval, SecurityType, SignatureType, BasicAuthUsername, BasicAuthPassword
+    [9] Permission added as child of Course
+    [10] Access restricted to have a value in a given enumeration
+    [11] UpdateGroup added as child of ITunesUDocument
+    [12] AllowSubscription restricted to have a value in given enumeration
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<xsd:element name="ITunesUDocument">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Version" minOccurs="1" maxOccurs="1"/>
+            <xsd:element ref="ShowTree" minOccurs="0"/>
+            <xsd:element ref="MergeSite" minOccurs="0"/>
+            <xsd:element ref="AddDivision" minOccurs="0"/>
+            <xsd:element ref="DeleteDivision" minOccurs="0"/>
+            <xsd:element ref="MergeDivision" minOccurs="0"/>
+            <xsd:element ref="AddSection" minOccurs="0"/>
+            <xsd:element ref="DeleteSection" minOccurs="0"/>
+            <xsd:element ref="MergeSection" minOccurs="0"/>
+            <xsd:element ref="AddCourse" minOccurs="0"/>
+            <xsd:element ref="DeleteCourse" minOccurs="0"/>
+            <xsd:element ref="MergeCourse" minOccurs="0"/>
+            <xsd:element ref="AddGroup" minOccurs="0"/>
+            <xsd:element ref="DeleteGroup" minOccurs="0"/>
+            <xsd:element ref="MergeGroup" minOccurs="0"/>
+            <xsd:element ref="UpdateGroup" minOccurs="0"/>
+            <xsd:element ref="AddTrack" minOccurs="0"/>
+            <xsd:element ref="DeleteTrack" minOccurs="0"/>
+            <xsd:element ref="MergeTrack" minOccurs="0"/>
+            <xsd:element ref="AddPermission" minOccurs="0"/>
+            <xsd:element ref="DeletePermission" minOccurs="0"/>
+            <xsd:element ref="MergePermission" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="ShowTree">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Handle" minOccurs="0"/>
+            <xsd:element ref="KeyGroup" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergeSite">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="SiteHandle" minOccurs="0"/>
+            <xsd:element ref="MergeByHandle" minOccurs="0"/>
+            <xsd:element ref="Destructive" minOccurs="0"/>
+            <xsd:element ref="Site"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="AddDivision">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle" minOccurs="0"/>
+            <xsd:element ref="ParentPath" minOccurs="0"/>
+            <xsd:element ref="TemplateHandle" minOccurs="0"/>
+            <xsd:element ref="Division"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="DeleteDivision">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="DivisionHandle"/>
+            <xsd:element ref="DivisionPath"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergeDivision">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="DivisionHandle"/>
+            <xsd:element ref="DivisionPath"/>
+            <xsd:element ref="MergeByHandle"/>
+            <xsd:element ref="Destructive"/>
+            <xsd:element ref="Division"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="AddSection">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle"/>
+            <xsd:element ref="ParentPath"/>
+            <xsd:element ref="Section"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="DeleteSection">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="SectionHandle"/>
+            <xsd:element ref="SectionPath"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergeSection">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="SectionHandle"/>
+            <xsd:element ref="SectionPath"/>
+            <xsd:element ref="MergeByHandle"/>
+            <xsd:element ref="Destructive"/>
+            <xsd:element ref="Section"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="AddCourse">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle"/>
+            <xsd:element ref="ParentPath" minOccurs="0"/>
+            <xsd:element ref="TemplateHandle" minOccurs="0"/>
+            <xsd:element ref="Course"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="DeleteCourse">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="CourseHandle"/>
+            <xsd:element ref="CoursePath"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergeCourse">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="CourseHandle" minOccurs="0"/>
+            <xsd:element ref="CoursePath" minOccurs="0"/>
+            <xsd:element ref="MergeByHandle" minOccurs="0"/>
+            <xsd:element ref="Destructive" minOccurs="0"/>
+            <xsd:element ref="Course"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="AddGroup">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle" minOccurs="0"/>
+            <xsd:element ref="ParentPath" minOccurs="0"/>
+            <xsd:element ref="Group" minOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="DeleteGroup">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="GroupHandle"/>
+            <xsd:element ref="GroupPath"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergeGroup">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="GroupHandle" minOccurs="0"/>
+            <xsd:element ref="GroupPath" minOccurs="0"/>
+            <xsd:element ref="MergeByHandle" minOccurs="0"/>
+            <xsd:element ref="Destructive" minOccurs="0"/>
+            <xsd:element ref="Group" minOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="UpdateGroup">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="GroupHandle"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+    
+<xsd:element name="AddTrack">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle"/>
+            <xsd:element ref="ParentPath"/>
+            <xsd:element ref="Track"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="DeleteTrack">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="TrackHandle"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergeTrack">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="TrackHandle"/>
+            <xsd:element ref="Track"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="AddPermission">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle"/>
+            <xsd:element ref="ParentPath"/>
+            <xsd:element ref="Permission"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="DeletePermission">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle"/>
+            <xsd:element ref="ParentPath"/>
+            <xsd:element ref="Credential"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="MergePermission">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="ParentHandle"/>
+            <xsd:element ref="ParentPath"/>
+            <xsd:element ref="Permission"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Site">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name"/>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="AllowSubscription"/>
+            <xsd:element ref="Permission"/>
+            <xsd:element ref="Section"/>
+            <xsd:element ref="Templates"/>
+            <xsd:element ref="ThemeHandle" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Templates">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name"/>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="Course"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Permission">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Credential"/>
+            <xsd:element ref="Access"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Section">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name" minOccurs="0"/>
+            <xsd:element ref="Handle" minOccurs="0"/>
+            <xsd:element ref="Course" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Course">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name" minOccurs="0"/>
+            <xsd:element ref="ShortName" minOccurs="0"/>
+            <xsd:element ref="Identifier" minOccurs="0"/>
+            <xsd:element ref="Instructor" minOccurs="0"/>
+            <xsd:element ref="Description" minOccurs="0"/>
+            <xsd:element ref="Group" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element ref="AllowSubscription" minOccurs="0"/>
+            <xsd:element ref="ThemeHandle" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="Permission" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Group">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name" minOccurs="0"/>
+            <xsd:element ref="Handle" minOccurs="0"/>
+            <xsd:element ref="GroupType" minOccurs="0"/>
+            <xsd:element ref="Track" minOccurs="0"/>
+            <xsd:element ref="Permission" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element ref="AllowSubscription" minOccurs="0"/>
+            <xsd:element ref="ExternalFeed" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="ExternalFeed">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="URL" minOccurs="0"/>
+            <xsd:element ref="OwnerEmail" minOccurs="0"/>
+            <xsd:element ref="PollingInterval" minOccurs="0"/>
+            <xsd:element ref="SecurityType" minOccurs="0"/>
+            <xsd:element ref="SignatureType" minOccurs="0"/>
+            <xsd:element ref="BasicAuthUsername" minOccurs="0"/>
+            <xsd:element ref="BasicAuthPassword" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+    
+<xsd:element name="Track">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name"/>
+            <xsd:element ref="Handle"/>
+            <xsd:element ref="Kind"/>
+            <xsd:element ref="DiscNumber"/>
+            <xsd:element ref="DurationMilliseconds"/>
+            <xsd:element ref="AlbumName"/>
+            <xsd:element ref="ArtistName"/>
+            <xsd:element ref="DownloadURL"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Division">
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element ref="Name" minOccurs="0"/>
+            <xsd:element ref="ShortName" minOccurs="0"/>
+            <xsd:element ref="Identifier" minOccurs="0"/>
+            <xsd:element ref="AllowSubscription" minOccurs="0"/>
+            <xsd:element ref="Permission" minOccurs="0"/>
+            <xsd:element ref="Section" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element ref="ThemeHandle" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:element>
+
+<xsd:element name="Version" type="xsd:string" fixed="1.1"/>
+<xsd:element name="MergeByHandle" type="xsd:string"/>
+<xsd:element name="Destructive" type="xsd:string"/>
+<xsd:element name="Handle" type="xsd:string"/>
+<xsd:element name="KeyGroup">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="minimal"/>
+            <xsd:enumeration value="most"/>
+            <xsd:enumeration value="maximal"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+<xsd:element name="SiteHandle" type="xsd:string"/>
+<xsd:element name="ParentHandle" type="xsd:string"/>
+<xsd:element name="DivisionHandle" type="xsd:string"/>
+<xsd:element name="SectionHandle" type="xsd:string"/>
+<xsd:element name="TemplateHandle" type="xsd:string"/>
+<xsd:element name="CourseHandle" type="xsd:string"/>
+<xsd:element name="GroupHandle" type="xsd:string"/>
+<xsd:element name="TrackHandle" type="xsd:string"/>
+<xsd:element name="Name" type="xsd:string"/>
+<xsd:element name="AllowSubscription">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="true"/>
+            <xsd:enumeration value="false"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+<xsd:element name="Credential" type="xsd:string"/>
+<xsd:element name="Access">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="No Access"/>
+            <xsd:enumeration value="Streaming"/>
+            <xsd:enumeration value="Download"/>
+            <xsd:enumeration value="Drop Box"/>
+            <xsd:enumeration value="Shared"/>
+            <xsd:enumeration value="Edit"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+<xsd:element name="ShortName" type="xsd:string"/>
+<xsd:element name="Identifier" type="xsd:string"/>
+<xsd:element name="Instructor" type="xsd:string"/>
+<xsd:element name="Description" type="xsd:string"/>
+<xsd:element name="Kind" type="xsd:string"/>
+<xsd:element name="DiscNumber" type="xsd:string"/>
+<xsd:element name="DurationMilliseconds" type="xsd:string"/>
+<xsd:element name="AlbumName" type="xsd:string"/>
+<xsd:element name="ArtistName" type="xsd:string"/>
+<xsd:element name="DownloadURL" type="xsd:string"/>
+<xsd:element name="ParentPath" type="xsd:string"/>
+<xsd:element name="DivisionPath" type="xsd:string"/>
+<xsd:element name="SectionPath" type="xsd:string"/>
+<xsd:element name="CoursePath" type="xsd:string"/>
+<xsd:element name="GroupPath" type="xsd:string"/>
+<xsd:element name="ThemeHandle" type="xsd:string"/>
+
+<xsd:element name="GroupType">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Simple"/>
+            <xsd:enumeration value="Smart"/>
+            <xsd:enumeration value="Feed"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+
+<xsd:element name="URL" type="xsd:string"/>
+<xsd:element name="OwnerEmail" type="xsd:string"/>
+
+<xsd:element name="PollingInterval">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Never"/>
+            <xsd:enumeration value="Daily"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:element>
+    
+<xsd:element name="SecurityType">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="HTTP Basic Authentication"/>
+        </xsd:restriction>    
+    </xsd:simpleType>
+</xsd:element>
+
+<xsd:element name="SignatureType">
+    <xsd:simpleType>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="Append SHA-256"/>
+        </xsd:restriction>    
+    </xsd:simpleType>
+</xsd:element>
+    
+<xsd:element name="BasicAuthUsername" type="xsd:string"/>
+<xsd:element name="BasicAuthPassword" type="xsd:string"/>
+</xsd:schema>
